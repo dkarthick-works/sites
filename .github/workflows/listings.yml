@@ -1,0 +1,36 @@
+name: listings
+on:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - run: python - <<'EOF'
+        import re
+        from pathlib import Path
+        # ponytail: O(n) dir scan, fine until hundreds of pages; then paginate listings.
+        for section in ("research", "learning", "plans"):
+            root = Path(section)
+            items = sorted(
+                (p.parent.name for p in root.glob("*/index.html") if p.parent != root),
+            )
+            lis = "\n".join(f'<li><a href="/{section}/{s}/">{s}</a></li>' for s in items)
+            block = f"<!-- LISTING:START -->\n<ul>\n{lis}\n</ul>\n<!-- LISTING:END -->"
+            f = root / "index.html"
+            html = f.read_text()
+            html = re.sub(r"<!-- LISTING:START -->.*?<!-- LISTING:END -->", block, html, flags=re.S)
+            f.write_text(html)
+        EOF
+      - run: |
+          git config user.name "listings-bot"
+          git config user.email "listings-bot@users.noreply.github.com"
+          git add research/index.html learning/index.html plans/index.html
+          git diff --cached --quiet || git commit -m "regen listings"
+          git push
