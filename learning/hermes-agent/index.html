@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meet Hermes</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: a fixed 1280x720 stage scaled to the window; one slide visible at a time; every slide animates in on entry. */
+:root{
+  --bg:#eef1f6; --surface:#ffffff; --ink:#131a2e; --muted:#566080; --line:#cdd5e3;
+  --gold:#b87400; --gold-soft:#fbe9c4; --teal:#0c7a82; --teal-soft:#d5eeee; --warn:#bf3f2b; --ok:#1c8a4e;
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",sans-serif;
+  --body:"Instrument Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0d1322; --surface:#161f36; --ink:#eaeefb; --muted:#9ba6c6; --line:#2b3657;
+  --gold:#f2b544; --gold-soft:#3a2e12; --teal:#56cfcf; --teal-soft:#123437; --warn:#ff8571; --ok:#55d68c; color-scheme:dark } }
+:root[data-theme="dark"]{
+  --bg:#0d1322; --surface:#161f36; --ink:#eaeefb; --muted:#9ba6c6; --line:#2b3657;
+  --gold:#f2b544; --gold-soft:#3a2e12; --teal:#56cfcf; --teal-soft:#123437; --warn:#ff8571; --ok:#55d68c; color-scheme:dark }
+
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden}
+#stage{position:absolute;top:50%;left:50%;width:1280px;height:720px;transform-origin:center;font-size:22px;line-height:1.4}
+
+.slide{position:absolute;inset:0;padding:52px 76px 78px;display:none;flex-direction:column;gap:26px}
+.slide.active{display:flex}
+.eyebrow{font-family:var(--mono);font-size:14px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:0}
+h1,h2,h3,p{margin:0}
+h1{font-family:var(--display);font-weight:800;font-size:150px;line-height:.9;letter-spacing:-.04em}
+h2{font-family:var(--display);font-weight:700;font-size:46px;line-height:1.05;letter-spacing:-.02em;text-wrap:balance;max-width:22em}
+h3{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.15}
+.lede{font-size:26px;color:var(--muted);max-width:30em}
+.small{font-size:17px;color:var(--muted)}
+.mono{font-family:var(--mono)}
+b,strong{font-weight:600}
+.gold{color:var(--gold)} .teal{color:var(--teal)}
+.grow{flex:1;min-height:0}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.stack{display:flex;flex-direction:column;gap:16px}
+ul{margin:0;padding-left:1.1em;display:flex;flex-direction:column;gap:10px}
+code{font-family:var(--mono);font-size:.85em;background:var(--teal-soft);color:var(--ink);padding:.1em .35em;border-radius:4px}
+
+/* entry animation: restarts every time a slide is shown, because hidden slides are display:none */
+.a{animation:rise .55s cubic-bezier(.2,.7,.2,1) both;animation-delay:calc(var(--i,0)*.14s)}
+@keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes pulse{50%{opacity:.35}}
+
+/* chrome */
+#bar{position:fixed;left:0;right:0;bottom:0;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));display:flex;align-items:center;gap:14px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+#track{flex:1;height:3px;background:var(--line);border-radius:2px;overflow:hidden}
+#fill{height:100%;width:0;background:var(--gold);transition:width .3s}
+#bar button{font:inherit;color:var(--ink);background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:5px 11px;cursor:pointer}
+#bar button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* 1 title */
+.route{display:flex;align-items:center;gap:0;margin-top:auto;font-family:var(--mono);font-size:16px}
+.chip{border:1.5px solid var(--ink);border-radius:999px;padding:9px 18px;background:var(--surface);white-space:nowrap}
+.wire{flex:1;height:2px;background:var(--line);position:relative;min-width:40px}
+.wire::after{content:"";position:absolute;top:-5px;left:0;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--gold);animation:travel 2.2s ease-in-out infinite alternate}
+@keyframes travel{to{left:100%}}
+
+/* 2 ladder */
+.ladder{display:flex;flex-direction:column;gap:10px}
+.rung{margin-left:calc(var(--i)*52px);display:grid;grid-template-columns:150px 1fr auto;gap:22px;align-items:baseline;padding:13px 20px;background:var(--surface);border-left:4px solid var(--line);font-size:21px}
+.rung h3{font-size:28px}
+.rung.here{border-left-color:var(--gold)}
+.tag{font-family:var(--mono);font-size:13px;background:var(--gold-soft);color:var(--ink);padding:4px 10px;border-radius:999px;white-space:nowrap}
+
+/* 3 tokens */
+.gen{font-family:var(--mono);font-size:21px;line-height:2.1;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:20px 24px;min-height:190px}
+.tok{display:inline-block;padding:0 7px;margin-right:4px;border-radius:5px;line-height:1.6;background:var(--teal-soft);animation:rise .3s both;animation-delay:calc(1s + var(--i)*.4s)}
+.tok:nth-of-type(even){background:var(--gold-soft)}
+.caret{display:inline-block;width:10px;height:22px;background:var(--ink);vertical-align:-4px;animation:pulse 1s steps(1) infinite}
+.meter{display:grid;grid-template-columns:76px 1fr 64px;gap:12px;align-items:center;font-size:17px;font-variant-numeric:tabular-nums}
+.meter i{display:block;height:14px;border-radius:3px;background:var(--teal);transform-origin:left;animation:grow .9s 1.2s both}
+@keyframes grow{from{transform:scaleX(0)}}
+
+/* 4 context */
+.ctx{height:64px;border:2px solid var(--ink);border-radius:8px;position:relative;overflow:hidden;background:var(--surface)}
+.ctx i{position:absolute;inset:0 auto 0 0;width:45%;background:repeating-linear-gradient(90deg,var(--teal) 0 46px,var(--teal-soft) 46px 50px);animation:fillctx 11s linear infinite}
+.ctx b{position:absolute;inset:0;display:grid;place-items:center;font-family:var(--mono);font-size:16px;background:var(--gold-soft);opacity:0;animation:flash 11s linear infinite}
+@keyframes fillctx{0%{width:5%}58%{width:100%}68%{width:100%}72%{width:14%}100%{width:45%}}
+@keyframes flash{0%,59%{opacity:0}61%,68%{opacity:.94}72%,100%{opacity:0}}
+.scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:14px;color:var(--muted);margin-top:8px}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:36px}
+.three>div{border-top:2px solid var(--line);padding-top:14px;display:flex;flex-direction:column;gap:8px;font-size:19px}
+
+/* 5 loop */
+.loop{position:relative;width:320px;height:320px;margin:10px auto 0}
+.loop::before{content:"";position:absolute;inset:30px;border:2px dashed var(--line);border-radius:50%}
+.orbit{position:absolute;inset:30px;animation:spin 6s linear infinite}
+.orbit::after{content:"";position:absolute;top:-9px;left:50%;margin-left:-9px;width:18px;height:18px;border-radius:50%;background:var(--gold)}
+.node{position:absolute;transform:translate(-50%,-50%);background:var(--ink);color:var(--bg);font-family:var(--display);font-weight:700;font-size:22px;padding:9px 20px;border-radius:999px}
+.loop .mid{position:absolute;inset:0;display:grid;place-items:center;text-align:center;font-family:var(--mono);font-size:14px;color:var(--muted)}
+.trace{display:flex;flex-direction:column;gap:9px;font-size:19px}
+.trace>div{display:grid;grid-template-columns:96px 1fr;gap:14px;align-items:baseline}
+.trace span{font-family:var(--mono);font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--teal)}
+
+/* 7 terminal */
+.term{background:#0b1020;color:#dfe6fa;font-family:var(--mono);font-size:17px;line-height:1.75;border-radius:10px;padding:20px 24px;border:1px solid var(--line)}
+.term .dim{color:#8590b3} .term .g{color:#6fe0a0} .term .y{color:#f2b544}
+.type{display:inline-block;overflow:hidden;white-space:nowrap;width:0;vertical-align:bottom;animation:type 1.5s steps(30) .5s forwards}
+@keyframes type{to{width:30ch}}
+.term .a{animation-delay:calc(2.1s + var(--i)*.5s)}
+table{border-collapse:collapse;width:100%;font-size:19px}
+th{font-family:var(--mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:400}
+th,td{padding:11px 14px 11px 0;border-bottom:1px solid var(--line);vertical-align:top}
+
+/* 8 gap */
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;background:var(--ok);animation:pulse 1.6s infinite}
+.dot.off{background:var(--muted);animation:none}
+.versus td:nth-child(2){color:var(--muted)}
+.versus th:nth-child(3),.versus td:nth-child(3){padding-left:18px;background:var(--surface)}
+
+/* 9 features, 15 use cases */
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);border-left:1px solid var(--line)}
+.grid3>div{padding:16px 20px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:6px;font-size:17.5px;color:var(--muted)}
+.grid3 h3{color:var(--ink);font-size:22px}
+
+/* 10 flow */
+.flow{display:flex;align-items:flex-start}
+.flow .wire{margin-top:46px}
+.box{width:206px;min-height:94px;background:var(--surface);border:1.5px solid var(--ink);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:3px;font-size:15.5px;color:var(--muted)}
+.box h3{font-size:21px;color:var(--ink)}
+.box.main{border-color:var(--gold);border-width:2.5px}
+.down{width:2px;height:44px;background:var(--line);margin:0 auto;position:relative}
+.down::after{content:"";position:absolute;left:-5px;top:0;width:12px;height:12px;margin-top:-6px;border-radius:50%;background:var(--teal);animation:fall 1.6s ease-in-out infinite alternate}
+@keyframes fall{to{top:100%}}
+
+/* 12 steps */
+.steps{display:grid;grid-template-columns:repeat(6,1fr);gap:18px;position:relative;padding-top:6px}
+.steps::before{content:"";position:absolute;top:28px;left:22px;right:8%;height:2px;background:var(--gold);transform-origin:left;animation:grow 2.6s .3s both}
+.steps>div{display:flex;flex-direction:column;gap:10px;font-size:16.5px;color:var(--muted);position:relative}
+.steps>div{animation-delay:calc(.3s + var(--i)*.42s)}
+.num{width:46px;height:46px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-family:var(--display);font-weight:700;font-size:22px}
+.steps h3{font-size:20px;color:var(--ink)}
+
+/* 14 chat */
+.phone{width:330px;height:470px;border:2px solid var(--ink);border-radius:30px;background:var(--surface);padding:16px 14px;display:flex;flex-direction:column;margin:0 auto}
+.phone header{font-family:var(--display);font-weight:700;font-size:17px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.msg{max-width:84%;padding:9px 13px;border-radius:16px;font-size:16px;line-height:1.35;margin-top:10px;animation:rise .35s both;animation-delay:var(--t)}
+.me{align-self:flex-end;background:var(--teal);color:var(--surface);border-bottom-right-radius:4px}
+.it{align-self:flex-start;background:var(--bg);border-bottom-left-radius:4px}
+.typing{color:var(--muted);font-family:var(--mono);font-size:13px;overflow:hidden;animation:typing 2.2s 3.2s both}
+@keyframes typing{0%{opacity:0;max-height:0;margin-top:0;padding-block:0}12%,88%{opacity:1;max-height:40px;margin-top:10px;padding-block:9px}100%{opacity:0;max-height:0;margin-top:0;padding-block:0}}
+
+.close{font-family:var(--display);font-weight:700;font-size:34px;letter-spacing:-.01em;margin-top:auto}
+
+@media (prefers-reduced-motion: reduce){*{animation-duration:.01ms!important;animation-delay:0s!important;animation-iteration-count:1!important}}
+</style>
+</head>
+<body>
+<main id="stage">
+
+<!-- 1 -->
+<section class="slide" data-sec="Start">
+  <p class="eyebrow a">A practical introduction</p>
+  <h1 class="a" style="--i:1">Hermes</h1>
+  <p class="lede a" style="--i:2">An AI agent that stays awake on your own server and answers from your chat app. Plus the five ideas you need to understand it.</p>
+  <div class="route a" style="--i:4">
+    <span class="chip">you, on Telegram</span><span class="wire"></span>
+    <span class="chip">Hermes, on a server</span><span class="wire"></span>
+    <span class="chip">a language model</span>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide" data-sec="Foundations">
+  <p class="eyebrow">Foundations</p>
+  <h2>Five words, each built on the one before</h2>
+  <div class="ladder grow">
+    <div class="rung a" style="--i:0"><h3>AI</h3><span>Software that does tasks we used to think needed a person.</span></div>
+    <div class="rung a" style="--i:1"><h3>LLM</h3><span>One kind of AI: a model trained on text that writes text back.</span></div>
+    <div class="rung a" style="--i:2"><h3>Agent</h3><span>An LLM that can take actions and keep going until a job is done.</span></div>
+    <div class="rung a here" style="--i:3"><h3>Harness</h3><span>The program around the model that gives it tools, memory and rules.</span><span class="tag">Hermes is one of these</span></div>
+    <div class="rung a" style="--i:4"><h3>TUI</h3><span>A harness you use by typing in a terminal window.</span></div>
+  </div>
+  <p class="small a" style="--i:6">The next five slides take these one at a time.</p>
+</section>
+
+<!-- 3 -->
+<section class="slide" data-sec="Foundations">
+  <p class="eyebrow">Foundations · LLM</p>
+  <h2>An LLM writes one small piece of text at a time</h2>
+  <div class="cols grow">
+    <div class="stack">
+      <div class="gen a" style="--i:1">
+        <span class="small mono">prompt</span><br>
+        The capital of Tamil Nadu is
+        <span class="tok" style="--i:0">Chennai</span><span class="tok" style="--i:1">,</span><span class="tok" style="--i:2">a</span><span class="tok" style="--i:3">coastal</span><span class="tok" style="--i:4">city</span><span class="tok" style="--i:5">on</span><span class="tok" style="--i:6">the</span><span class="tok" style="--i:7">Bay</span><span class="tok" style="--i:8">of</span><span class="tok" style="--i:9">Bengal</span><span class="tok" style="--i:10">.</span><span class="caret"></span>
+      </div>
+      <p class="small a" style="--i:2">Each coloured piece is a <b>token</b>, roughly three quarters of a word. The model picks the most fitting next token, again and again.</p>
+    </div>
+    <div class="stack">
+      <h3 class="a" style="--i:3">Tokens are also the unit you pay in</h3>
+      <div class="meter a" style="--i:4"><span>Input</span><i style="width:20%"></i><span>$4</span></div>
+      <div class="meter a" style="--i:4"><span>Output</span><i style="width:100%"></i><span>$20</span></div>
+      <p class="small a" style="--i:5">Per million tokens, the rates quoted in our session for a top-tier model. What the model writes costs about five times what it reads.</p>
+      <ul class="small a" style="--i:6">
+        <li><b>Subscription:</b> a flat monthly fee, like ChatGPT or Claude plans.</li>
+        <li><b>API key:</b> pay only for the tokens you use.</li>
+        <li><b>OpenRouter:</b> one wallet and one key for hundreds of models, some of them free.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide" data-sec="Foundations">
+  <p class="eyebrow">Foundations · LLM</p>
+  <h2>The context window is the model's working memory</h2>
+  <p class="lede a" style="--i:1">The model remembers nothing between messages. Every turn, the whole conversation so far is sent again.</p>
+  <div class="a" style="--i:2">
+    <div class="ctx"><i></i><b>window full → conversation summarised, detail lost</b></div>
+    <div class="scale"><span>0</span><span>each stripe is one more turn</span><span>272K tokens</span></div>
+  </div>
+  <div class="three grow">
+    <div class="a" style="--i:4"><h3>It has a size</h3><span>Common limits run from about 272K tokens to 1 million. The harness shows how full it is, for example <span class="mono">13.4%</span>.</span></div>
+    <div class="a" style="--i:5"><h3>It fills up</h3><span>At the limit, the harness squeezes the chat into a summary and starts a fresh window. Fine details go missing.</span></div>
+    <div class="a" style="--i:6"><h3>So match it to the job</h3><span>Short questions fit anywhere. Long projects want the larger window, and a new session per topic keeps things sharp.</span></div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide" data-sec="Foundations">
+  <p class="eyebrow">Foundations · Agent</p>
+  <h2>An agent is an LLM working in a loop</h2>
+  <div class="cols grow">
+    <div>
+      <div class="loop a" style="--i:1">
+        <div class="orbit"></div>
+        <div class="mid">repeat<br>until the job<br>is done</div>
+        <span class="node" style="left:160px;top:30px">Think</span>
+        <span class="node" style="left:273px;top:225px">Act</span>
+        <span class="node" style="left:47px;top:225px">Observe</span>
+      </div>
+      <p class="small a" style="--i:2;text-align:center;margin-top:18px">A chatbot answers once. An agent keeps going.</p>
+    </div>
+    <div class="trace">
+      <p class="a" style="--i:2"><b>What we asked:</b> “My Hermes app is not starting. Find the issue and fix it.”</p>
+      <div class="a" style="--i:4"><span>Think</span><p>Locate the installation and try to start it.</p></div>
+      <div class="a" style="--i:5"><span>Act</span><p>Runs the start command in the terminal.</p></div>
+      <div class="a" style="--i:6"><span>Observe</span><p>The backend times out during startup.</p></div>
+      <div class="a" style="--i:7"><span>Think</span><p>A half-finished update is forcing a full rebuild.</p></div>
+      <div class="a" style="--i:8"><span>Act</span><p>Completes the update and relaunches.</p></div>
+      <div class="a" style="--i:9"><span>Observe</span><p class="teal"><b>Starts normally. Done, with no steps from us.</b></p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide" data-sec="Foundations">
+  <p class="eyebrow">Foundations · Harness</p>
+  <h2>The model is the brain. The harness gives it hands.</h2>
+  <div class="cols">
+    <div class="stack a" style="--i:1">
+      <h3>A model on its own</h3>
+      <ul><li>Knows a lot and reasons well</li><li>Can only produce text</li><li>Cannot open a file, run a command or browse</li></ul>
+    </div>
+    <div class="stack a" style="--i:2">
+      <h3 class="gold">What the harness adds</h3>
+      <ul>
+        <li><b>Tools:</b> actions it can take, such as the terminal, files and web search</li>
+        <li><b>Skills:</b> saved instructions for a job it has learned to do</li>
+        <li><b>Memory</b> and <b>permissions</b>, and it runs the loop</li>
+      </ul>
+    </div>
+  </div>
+  <div class="three grow" style="grid-template-columns:1fr 1fr">
+    <div class="a" style="--i:4"><span class="small mono">you say</span><span>“Create a folder called reports.”</span><span class="small">The model decides the command. The harness runs <code>mkdir reports</code>.</span></div>
+    <div class="a" style="--i:5"><span class="small mono">you say</span><span>“Organise this folder by client.”</span><span class="small">The model writes a small script for your rule. The harness runs it and reports back.</span></div>
+  </div>
+  <p class="small a" style="--i:6">Hermes is not an LLM. It borrows its intelligence from whichever model you connect.</p>
+</section>
+
+<!-- 7 -->
+<section class="slide" data-sec="Foundations">
+  <p class="eyebrow">Foundations · TUI</p>
+  <h2>A TUI is a harness that lives in your terminal</h2>
+  <div class="cols grow">
+    <div class="stack">
+      <div class="term a" style="--i:1">
+        <div><span class="y">&gt;</span> <span class="type">add a holidays page to my site</span></div>
+        <div class="a dim" style="--i:0">● Read 3 files</div>
+        <div class="a dim" style="--i:1">● Wrote holidays/index.html</div>
+        <div class="a dim" style="--i:2">● Ran git push</div>
+        <div class="a g" style="--i:3">✓ Page is live</div>
+        <div class="a dim" style="--i:4;margin-top:10px;font-size:14px">↑6.2k ↓138 · $0.036 · context 13.4% · thinking: medium</div>
+      </div>
+      <p class="small a" style="--i:2">The status line is real: tokens in, tokens out, cost so far, how full the context window is, and how hard the model thinks before answering.</p>
+    </div>
+    <div class="stack a" style="--i:3">
+      <table>
+        <tr><th>Harness</th><th>From</th><th>Models</th></tr>
+        <tr><td><b>Claude Code</b></td><td>Anthropic</td><td>Claude only</td></tr>
+        <tr><td><b>Codex</b></td><td>OpenAI</td><td>GPT only</td></tr>
+        <tr><td><b>Pi, OpenCode</b></td><td>Open source</td><td>Any you bring</td></tr>
+        <tr><td><b class="gold">Hermes</b></td><td>Open source</td><td>Any you bring</td></tr>
+      </table>
+      <p class="small">There are 20 to 30 of these today and a new one most weeks. They differ in polish and features. The loop underneath is the same.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide" data-sec="Hermes">
+  <p class="eyebrow">Why Hermes</p>
+  <h2>The catch with a terminal agent: close the laptop and it stops</h2>
+  <table class="versus a grow" style="--i:1;font-size:21px">
+    <tr><th></th><th><span class="dot off"></span>Agent in your terminal</th><th><span class="dot"></span>Agent on a server, in your chat app</th></tr>
+    <tr><td class="small">Awake</td><td>Only while the laptop is open</td><td><b>All day, every day</b></td></tr>
+    <tr><td class="small">You reach it</td><td>At your desk, in the right folder</td><td><b>From your phone, like texting a colleague</b></td></tr>
+    <tr><td class="small">It starts work</td><td>When you type</td><td><b>When you message, or on a schedule</b></td></tr>
+    <tr><td class="small">It works on</td><td>Your personal files</td><td><b>A machine of its own</b></td></tr>
+  </table>
+  <p class="lede a" style="--i:3">The right-hand column is what Hermes is built for.</p>
+</section>
+
+<!-- 9 -->
+<section class="slide" data-sec="Hermes">
+  <p class="eyebrow">Hermes</p>
+  <h2>Hermes is an open-source harness built to be a personal agent</h2>
+  <p class="lede a" style="--i:1">Same loop as a coding TUI, with a desktop app, a web UI and a gateway to your messaging apps on top.</p>
+  <div class="grid3 grow">
+    <div class="a" style="--i:2"><h3>Lives in your chat apps</h3>Telegram, Slack, WhatsApp, Matrix and more. Telegram is the easiest to set up.</div>
+    <div class="a" style="--i:3"><h3>Any model</h3>Pick a provider, sign in with a subscription or paste an API key, and switch whenever you like.</div>
+    <div class="a" style="--i:4"><h3>Memory</h3>Tell it your name, interests and how you work. It keeps that across conversations.</div>
+    <div class="a" style="--i:5"><h3>Skills</h3>Teach a workflow once, such as “how I publish a page”, and ask for it by name afterwards.</div>
+    <div class="a" style="--i:6"><h3>Scheduled jobs</h3>Recurring tasks run on their own and post results to a home channel you choose.</div>
+    <div class="a" style="--i:7"><h3>Yours</h3>Your server, your configuration, your data. You always know which model sees what.</div>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide" data-sec="Hermes">
+  <p class="eyebrow">Hermes · How it works</p>
+  <h2>How one message travels</h2>
+  <div class="flow a" style="--i:1">
+    <div class="box"><h3>You</h3>Type in Telegram on your phone</div>
+    <span class="wire"></span>
+    <div class="box"><h3>Bot</h3>A doorway. It passes messages along and has no intelligence.</div>
+    <span class="wire"></span>
+    <div>
+      <div class="box main"><h3>Hermes agent</h3>Runs the loop on your server</div>
+      <div class="down"></div>
+      <div class="box"><h3>Tools and skills</h3>Files, terminal, web search, GitHub</div>
+    </div>
+    <span class="wire"></span>
+    <div class="box"><h3>LLM provider</h3>Decides what to say and what to do next</div>
+  </div>
+  <div class="three grow" style="align-content:end">
+    <div class="a" style="--i:3"><h3>Bot = the doorway</h3><span>Connects you to the agent. Nothing more.</span></div>
+    <div class="a" style="--i:4"><h3>Agent = the worker</h3><span>Takes the request, uses tools, keeps going.</span></div>
+    <div class="a" style="--i:5"><h3>Model = the brain</h3><span>Consulted at every step, even the simple ones.</span></div>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide" data-sec="Hermes">
+  <p class="eyebrow">Hermes · Where it runs</p>
+  <h2>Give the agent a machine of its own</h2>
+  <p class="lede a" style="--i:1">A VPS is a rented computer in a data centre. You will also hear “VM” and “instance”. They mean the same thing here.</p>
+  <div class="three grow">
+    <div class="a" style="--i:2"><h3>Always on</h3><span>The cloud provider keeps it powered and online. No dead battery, no closed lid.</span></div>
+    <div class="a" style="--i:3"><h3>A safe playground</h3><span>The agent can create, change and delete freely. If it makes a mess, your own files are untouched and you rebuild the server.</span></div>
+    <div class="a" style="--i:4"><h3>Cheap enough</h3><span>AWS, Google Cloud and Azure are priced for companies. Hetzner, Contabo and DigitalOcean suit individuals. Ours: 8 GB, in Mumbai, about ₹1,300 a month.</span></div>
+  </div>
+  <p class="small a" style="--i:6">Pick a region near you for faster replies. Two shortcuts exist: Hermes offers a one-click cloud deploy, and it also runs on your own computer if that stays switched on.</p>
+</section>
+
+<!-- 12 -->
+<section class="slide" data-sec="Setup">
+  <p class="eyebrow">Setup</p>
+  <h2>The setup, in six steps</h2>
+  <div class="steps grow">
+    <div class="a" style="--i:0"><span class="num">1</span><h3>Rent a server</h3>A small Linux VPS from any provider.</div>
+    <div class="a" style="--i:1"><span class="num">2</span><h3>Log in</h3>Connect from your laptop with SSH. It feels like a local terminal.</div>
+    <div class="a" style="--i:2"><span class="num">3</span><h3>Install</h3>Copy the one-line Linux installer from the Hermes site and paste it.</div>
+    <div class="a" style="--i:3"><span class="num">4</span><h3>Connect a model</h3>Choose a provider. We signed in with a ChatGPT subscription using a device code.</div>
+    <div class="a" style="--i:4"><span class="num">5</span><h3>Pick the settings</h3>Choose the model and how hard it thinks. We chose medium.</div>
+    <div class="a" style="--i:5"><span class="num">6</span><h3>Connect Telegram</h3>Scan a QR code, name your bot, press Save and restart.</div>
+  </div>
+  <p class="small a" style="--i:10">On the Mac desktop app, step 6 took about two minutes: scan, name the bot, say hi.</p>
+</section>
+
+<!-- 13 -->
+<section class="slide" data-sec="Setup">
+  <p class="eyebrow">Setup · What really happened</p>
+  <h2>It did not go smoothly, and that is the useful part</h2>
+  <table class="a grow" style="--i:1">
+    <tr><th>What broke</th><th>Why</th><th>What fixed it</th></tr>
+    <tr class="a" style="--i:2"><td><b>The installer stopped halfway</b></td><td>The Node.js download failed a verification check because the server lacked a system package.</td><td>We started Claude Code on the server and said “my setup stopped midway, check and complete it”. It did.</td></tr>
+    <tr class="a" style="--i:4"><td><b><span class="mono">hermes</span>: command not found</b></td><td>The terminal had not picked up the newly installed program.</td><td>Reloading the shell profile with one <code>source</code> command.</td></tr>
+    <tr class="a" style="--i:6"><td><b>The Telegram QR page would not open</b></td><td>The setup page ran on the server's own <span class="mono">localhost:9119</span>. Our laptop browser could not reach it, and the firewall blocks that port.</td><td>The agent printed the QR in the terminal, but pairing timed out. Still open: allow the port, or enter a bot token by hand.</td></tr>
+  </table>
+  <p class="close a" style="--i:8">We used an AI agent to install an AI agent. <span class="gold">When you are stuck, ask the agent.</span></p>
+</section>
+
+<!-- 14 -->
+<section class="slide" data-sec="In use">
+  <p class="eyebrow">In use</p>
+  <h2>Talking to it feels like texting</h2>
+  <div class="cols grow">
+    <div class="phone a" style="--i:1">
+      <header>Chow Chow <span class="small mono" style="font-weight:400;font-size:12px"><span class="dot" style="margin-left:6px"></span>bot</span></header>
+      <div class="msg me" style="--t:1s">hi</div>
+      <div class="msg it" style="--t:1.7s">Hey, how can I help?</div>
+      <div class="msg me" style="--t:2.6s">Give me a fact about Salem in Tamil Nadu</div>
+      <div class="msg it typing">typing…</div>
+      <div class="msg it" style="--t:5.4s">Salem is a major city in western Tamil Nadu, famous for its Malgova mangoes.</div>
+    </div>
+    <div class="stack">
+      <h3 class="a" style="--i:2">Behind that one reply</h3>
+      <div class="trace">
+        <div class="a" style="--i:4"><span>Bot</span><p>Hands the message to Hermes.</p></div>
+        <div class="a" style="--i:5"><span>Hermes</span><p>Opens a session and picks the skill it needs.</p></div>
+        <div class="a" style="--i:6"><span>Model</span><p>Thinks at medium effort and writes the answer.</p></div>
+        <div class="a" style="--i:7"><span>Bot</span><p>Delivers it to your phone.</p></div>
+      </div>
+      <p class="small a" style="--i:9">The same conversation appears in the Hermes app, so you can see exactly what the agent did. From here it can also set reminders, read photos you send and run research while you do something else.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide" data-sec="In use">
+  <p class="eyebrow">In use</p>
+  <h2>What people use it for</h2>
+  <div class="grid3 grow">
+    <div class="a" style="--i:1"><h3>Morning briefing</h3>Reads the news sites you chose and sends one summary before you wake up.</div>
+    <div class="a" style="--i:2"><h3>Inbox triage</h3>With read-only access, tells you which of 100 emails need you.</div>
+    <div class="a" style="--i:3"><h3>Research on demand</h3>“Analyse these 15 stocks and reply in this format.” Sent from your phone.</div>
+    <div class="a" style="--i:4"><h3>Publish a page</h3>Writes the HTML, pushes it to GitHub, and the site redeploys itself.</div>
+    <div class="a" style="--i:5"><h3>Posts from your work</h3>Reads the day's commits and drafts a tech post when something is worth sharing.</div>
+    <div class="a" style="--i:6"><h3>Server watch</h3>Keeps an eye on containers and logs, and investigates when something fails.</div>
+    <div class="a" style="--i:7"><h3>Code review</h3>Reviews pull requests automatically as they open.</div>
+    <div class="a" style="--i:8"><h3>Home and reminders</h3>“Turn off all the lights.” “Remind me at six.”</div>
+    <div class="a" style="--i:9"><h3>A team of agents</h3>One turns an idea into a spec, one writes tickets, one orders them, one builds.</div>
+  </div>
+  <p class="small a" style="--i:11">The pattern in all nine: a job that repeats, needs some judgement, and does not need you watching.</p>
+</section>
+
+<!-- 16 -->
+<section class="slide" data-sec="In use">
+  <p class="eyebrow">Before you start</p>
+  <h2>Before you hand it the keys</h2>
+  <div class="cols grow">
+    <div class="stack a" style="--i:1">
+      <table>
+        <tr><th></th><th>Hermes</th><th>A hosted assistant</th></tr>
+        <tr><td class="small">Model</td><td>You choose</td><td>They choose</td></tr>
+        <tr><td class="small">Your data</td><td>On your server</td><td>On theirs</td></tr>
+        <tr><td class="small">Custom skills</td><td>Anything you can describe</td><td>What they offer</td></tr>
+        <tr><td class="small">Setup</td><td class="gold"><b>You do all of it</b></td><td>Sign up and go</td></tr>
+      </table>
+      <p class="small">Hermes pays off if you enjoy tinkering. If you do not, a hosted assistant is a fair choice.</p>
+    </div>
+    <div class="stack">
+      <h3 class="a" style="--i:2">Four habits that keep it safe</h3>
+      <ul>
+        <li class="a" style="--i:3"><b>Read-only first.</b> Let it view mail before it can send or delete.</li>
+        <li class="a" style="--i:4"><b>Its own machine.</b> Keep it away from files you cannot lose.</li>
+        <li class="a" style="--i:5"><b>Closed ports.</b> Open only what the setup needs.</li>
+        <li class="a" style="--i:6"><b>Watch the meter.</b> Tokens cost money, and loops use many.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="close a" style="--i:8">Start small: <span class="gold">one bot, one job, read-only.</span></p>
+</section>
+
+</main>
+
+<nav id="bar" aria-label="Slides">
+  <button id="prev" aria-label="Previous slide">←</button>
+  <span id="count"></span>
+  <div id="track"><div id="fill"></div></div>
+  <span id="sec"></span>
+  <button id="next" aria-label="Next slide">→</button>
+</nav>
+
+<script>
+const stage = document.getElementById('stage'), slides = [...document.querySelectorAll('.slide')];
+let cur = 0;
+function fit(){ stage.style.transform = `translate(-50%,-50%) scale(${Math.min(innerWidth/1280, (innerHeight-44)/720) * .98})`; }
+function go(n){
+  cur = Math.max(0, Math.min(slides.length-1, n));
+  slides.forEach((s,i) => s.classList.toggle('active', i === cur));
+  document.getElementById('count').textContent = `${cur+1} / ${slides.length}`;
+  document.getElementById('sec').textContent = slides[cur].dataset.sec;
+  document.getElementById('fill').style.width = (cur+1)/slides.length*100 + '%';
+  history.replaceState(null, '', '#' + (cur+1));
+}
+addEventListener('resize', fit);
+addEventListener('keydown', e => {
+  if (['ArrowRight','PageDown',' ','Enter'].includes(e.key)) { e.preventDefault(); go(cur+1); }
+  else if (['ArrowLeft','PageUp','Backspace'].includes(e.key)) go(cur-1);
+  else if (e.key === 'Home') go(0);
+  else if (e.key === 'End') go(slides.length-1);
+  else if (e.key === 'f') document.documentElement.requestFullscreen?.().catch(()=>{});
+  else if (e.key === 't') { // toggle light/dark for the room you are presenting in
+    const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    r.dataset.theme = dark ? 'light' : 'dark';
+  }
+});
+document.getElementById('prev').onclick = e => { e.currentTarget.blur(); go(cur-1); };
+document.getElementById('next').onclick = e => { e.currentTarget.blur(); go(cur+1); };
+fit(); go((parseInt(location.hash.slice(1)) || 1) - 1);
+</script>
+</body>
+</html>
