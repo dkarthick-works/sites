@@ -1,0 +1,190 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>What people actually run on a $5 VPS (HN, 2026)</title><meta name="description" content="All 372 comments from the Hacker News thread on running things on a $5 VPS, top 30 reproduced and the whole thread sorted by category. 32 cited items."><style>*{box-sizing:border-box}body{margin:0;background:#faf9f4;color:#17241f;font:15px/1.55 system-ui,sans-serif}
+header{background:#105b49;color:white;padding:64px 5%}h1{font:700 clamp(34px,6vw,66px)/1.05 Georgia;margin:.1em 0;max-width:960px}
+header p{max-width:780px;font-size:18px}
+main{width:min(1160px,92%);margin:auto}section{padding:42px 0;border-bottom:1px solid #e3e8e5}
+h2{font:700 34px Georgia;margin:0 0 14px}h3{font:700 20px Georgia;margin:26px 0 8px}
+h4{font:700 15px system-ui;margin:22px 0 6px;text-transform:uppercase;letter-spacing:.04em;color:#105b49}
+p{margin:.6em 0 1em}.note{background:#e5f2b7;border-left:6px solid #105b49;padding:20px;margin:24px 0;border-radius:0 12px 12px 0}
+.warn{background:#fbe4df;border-left:6px solid #a33a24;padding:20px;margin:24px 0;border-radius:0 12px 12px 0}
+.table{overflow:auto;border:1px solid #d6dfda;border-radius:14px;background:white;margin:16px 0}
+table{border-collapse:collapse;width:100%;min-width:760px}th,td{padding:11px;border-bottom:1px solid #d6dfda;text-align:left;vertical-align:top}
+th{background:#eaf0ed;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+small{display:block;color:#67736f;margin-top:3px}
+.card{background:white;border:1px solid #d6dfda;border-radius:14px;padding:20px;margin:14px 0}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+ul,ol{padding-left:22px}li{margin:.35em 0}
+.sources{columns:2;column-gap:30px;font-size:13.5px}.sources li{break-inside:avoid;margin:0 0 13px}
+.sources a{word-break:break-word}
+sup.c{font-size:.68em;line-height:0;vertical-align:super}
+sup.c a{text-decoration:none;font-weight:700;color:#087259;padding:0 1px}
+.meta{font-size:13px;color:#67736f}
+.comments{background:white;border:1px solid #d6dfda;border-radius:14px;padding:8px 26px 20px;margin:16px 0}
+.comments li{margin:.85em 0}
+.comments b{color:#105b49}
+a{color:#087259;text-decoration-thickness:1px}
+code{background:#eef2f0;padding:1px 5px;border-radius:5px;font-size:13px}
+.bar{display:inline-block;height:9px;background:#0c7a82;border-radius:3px;vertical-align:middle;min-width:3px}
+.uv{background:#f0d9d4;color:#7d2b17;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;white-space:nowrap}
+.q{color:#105b49;font-style:italic}
+footer{border-top:1px solid #d6dfda;padding:30px 5%;color:#67736f;font-size:14px}
+@media(max-width:700px){.cols{grid-template-columns:1fr}.sources{columns:1}header{padding-top:45px}}</style></head><body>
+<header><b>ASK HN &middot; COMMUNITY DATA &middot; 2026</b>
+<h1>What people actually run on a $5 VPS</h1>
+<p>All 372 comments from <i>&ldquo;Ask HN: What do you run on a $5 VPS that&rsquo;s worth keeping online 24/7?&rdquo;</i>, with the top 30 reproduced and the whole thread sorted into categories. Read from the page source, not from memory.</p></header>
+<main>
+
+<section>
+<h2>Read this first</h2>
+<div class="note">
+<p><b>What this is.</b> A read of one Hacker News thread, not a survey and not a recommendation. The 30 comments below are the thread&rsquo;s own top-level comments in the order Hacker News served them; every summary links to the original comment, and the wording in quotation marks is verbatim.<sup class="c"><a href="#s1">1</a></sup></p>
+<p><b>What the numbers are.</b> The category table further down is <i>my</i> keyword analysis of all 372 comments, not a claim by Hacker News and not a count of unique people. A comment that lists twelve services counts once for each category it touches, and a service named twice in one comment counts twice. Read the table as <i>what gets talked about</i>, not as market share.</p>
+<p><b>One more thing.</b> Several people in this thread are describing home servers and mini PCs rather than the cloud VPS the question asked about. That drift is itself the finding.</p>
+</div>
+</section>
+
+<section>
+<h2>The thread</h2>
+<p><b>Ask HN: What do you run on a $5 VPS that&rsquo;s worth keeping online 24/7?</b> &mdash; posted by <b>mariocesar</b>, 234 points, <b>372 comments</b> at the time of reading. The asker framed it around replacing subscriptions and saving time; the thread answered that question in a much more interesting way than he probably expected.</p>
+<p class="meta">Fetched 2026-10-09 from <a href="https://news.ycombinator.com/item?id=49985548">news.ycombinator.com/item?id=49985548</a>. 164 of the 372 comments are top-level; the rest are replies.</p>
+</section>
+
+<section>
+<h2>Top 30 comments</h2>
+<p>In thread order, condensed. Usernames link to the original comment.</p>
+<div class="comments">
+<ol>
+<li><b>ehe78qhe</b> &mdash; A home server: qBittorrent, Jellyfin, Tailscale and Immich for photos, Gitea for private repos. The ambiguous &ldquo;Linux ISOs&rdquo; that runs through the rest of the thread starts here. <sup class="c"><a href="#s2">2</a></sup><small><a href="https://news.ycombinator.com/item?id=49989237">comment 49989237</a></small></li>
+<li><b>nha1</b> &mdash; Runs klar.im on a slightly larger box; says the VPS is $5&ndash;10/mo and the whole bill stays under $20. <sup class="c"><a href="#s3">3</a></sup><small><a href="https://news.ycombinator.com/item?id=50018231">comment 50018231</a></small></li>
+<li><b>chr15m</b> &mdash; The longest list in the thread. A WireGuard network linking laptop, phone, VPS and a home inference machine; a family shopping-list app; a life-metrics dashboard; a project priority tracker that reads git activity and RSS to work out what he is neglecting; voice note-to-self into Joplin; a phone AI agent behind a long-press; POSSE syndication; a blog pipeline. <sup class="c"><a href="#s4">4</a></sup><small><a href="https://news.ycombinator.com/item?id=50015915">comment 50015915</a></small></li>
+<li><b>throwaway81523</b> &mdash; Thinks $5/mo is <i>expensive</i>. Runs a personal site on a $4/<b>year</b> VPS and a separate ~$7/mo box for storage and git because its uplink beats his home connection. <sup class="c"><a href="#s5">5</a></sup><small><a href="https://news.ycombinator.com/item?id=50013773">comment 50013773</a></small></li>
+<li><b>prolly97</b> &mdash; Started frugal on a $5 Hetzner box and now pays about $100/mo. Continuous ingest workers and nightly batch jobs keep data fresh; he has published parts of it. Credits Dokploy/Coolify and pleasant developer experience, not the VPS. <sup class="c"><a href="#s6">6</a></sup><small><a href="https://news.ycombinator.com/item?id=50017219">comment 50017219</a></small></li>
+<li><b>guidedlight</b> &mdash; Points out you can run a competent app on React + Go + SQLite. Go is especially efficient on small instances, and that is a real competitive advantage over heavier architectures. <sup class="c"><a href="#s7">7</a></sup><small><a href="https://news.ycombinator.com/item?id=50017900">comment 50017900</a></small></li>
+<li><b>ahf8Aithaex7Nai</b> &mdash; Uses Yggdrasil for a flat private IPv6 namespace, with the cheapest VPS he could find as the always-reachable hub. Caddy on the VPS proxies to Immich, Gitea, Bookstack and Jellyfin at home. <sup class="c"><a href="#s8">8</a></sup><small><a href="https://news.ycombinator.com/item?id=50016133">comment 50016133</a></small></li>
+<li><b>huijzer</b> &mdash; Config is a git repo with one folder per Docker Compose service, plus Caddy in front. Runs his blog software, Syncthing, Borg, Radicale, Pingvin, Forgejo, Vaultwarden and Immich. Maintenance is <code>apt update &amp;&amp; apt upgrade</code> every two weeks. <sup class="c"><a href="#s9">9</a></sup><small><a href="https://news.ycombinator.com/item?id=50018112">comment 50018112</a></small></li>
+<li><b>viceconsole</b> &mdash; A Beelink N100 with 16&nbsp;GB: Immich, Jellyfin, Gonic, Snapcast, slskd, Audiobookshelf, Transmission, an automatic ripping machine, Vaultwarden, Frigate, Home Assistant, Actual Budget, Pocketbase, Vikunja, Forgejo, Readeck, Backrest/Restic, Gotify, Uptime Kuma and Caddy. <sup class="c"><a href="#s10">10</a></sup><small><a href="https://news.ycombinator.com/item?id=50014938">comment 50014938</a></small></li>
+<li><b>massysett</b> &mdash; The dissenting comment, and worth reading in full. He set up a ThinkCentre as a home server and concluded <span class="q">&ldquo;it&rsquo;s not worth it&rdquo;</span> &mdash; the machine solves some problems and creates others, above all the security and update burden. He now keeps cheap laptops in several locations and uses a flash drive. <sup class="c"><a href="#s11">11</a></sup><small><a href="https://news.ycombinator.com/item?id=50017857">comment 50017857</a></small></li>
+<li><b>nrdvana</b> &mdash; Email via postfix and dovecot, a personal site behind nginx and traefik, The Lounge for IRC, and Gitolite &mdash; all comfortably inside 1&nbsp;GB of RAM. <sup class="c"><a href="#s12">12</a></sup><small><a href="https://news.ycombinator.com/item?id=50015019">comment 50015019</a></small></li>
+<li><b>bawolff</b> &mdash; A personal homepage, mostly because he likes having an Apache server on the internet. It doubles as a file shuttle: upload with <code>scp</code>, download over HTTP. <sup class="c"><a href="#s13">13</a></sup><small><a href="https://news.ycombinator.com/item?id=50011341">comment 50011341</a></small></li>
+<li><b>wraptile</b> &mdash; Argues cheap VPSes no longer make sense for self-hosting. Two refurbished 32&nbsp;GB Lenovo laptops at $250 each, on NixOS, with Claude managing the config &mdash; though he reviews every rebuild before applying it. <sup class="c"><a href="#s14">14</a></sup><small><a href="https://news.ycombinator.com/item?id=50017667">comment 50017667</a></small></li>
+<li><b>icar</b> &mdash; Whatever the current project needs, which right now is a crawler for a relatively niche search engine. <sup class="c"><a href="#s15">15</a></sup><small><a href="https://news.ycombinator.com/item?id=50018205">comment 50018205</a></small></li>
+<li><b>SyzygyRhythm</b> &mdash; Vibe-codes small tools: specialised calculators, an SVG maker for his laser cutter, a blueprint explorer for his condo, visualisers, games. A $10/year VPS with one core. Also revived a box of old single-board computers with Codex-generated images. <sup class="c"><a href="#s16">16</a></sup><small><a href="https://news.ycombinator.com/item?id=50015888">comment 50015888</a></small></li>
+<li><b>mjcarden</b> &mdash; A cloud VM costing a few cents a month that exists solely as the git remote for his <code>pass</code> password store. Over a decade of use. <sup class="c"><a href="#s17">17</a></sup><small><a href="https://news.ycombinator.com/item?id=50015504">comment 50015504</a></small></li>
+<li><b>jbarberu</b> &mdash; Closed a VPS he had run for ten years. It hosted a personal site, some small static sites and git backups; a home server and a Cloudflare tunnel replaced it. <sup class="c"><a href="#s18">18</a></sup><small><a href="https://news.ycombinator.com/item?id=49988100">comment 49988100</a></small></li>
+<li><b>meteyor</b> &mdash; If he had a VPS he would install a Pangolin tunnel on it so his home IP is never exposed, and run nothing else on the VPS itself. <sup class="c"><a href="#s19">19</a></sup><small><a href="https://news.ycombinator.com/item?id=50017604">comment 50017604</a></small></li>
+<li><b>nicbou</b> &mdash; An appointment finder for the Berlin citizen&rsquo;s office that watched for free slots and pushed them over websockets. Now being shut down because the city fixed the underlying problem. <sup class="c"><a href="#s20">20</a></sup><small><a href="https://news.ycombinator.com/item?id=50017488">comment 50017488</a></small></li>
+<li><b>voidUpdate</b> &mdash; Local network instead of cloud: an old desktop running two Minecraft servers, another as a NAS with a Transmission client (he calls it the most useful box on the network), a mini Lenovo PC for Home Assistant, and a Raspberry Pi for a website. <sup class="c"><a href="#s21">21</a></sup><small><a href="https://news.ycombinator.com/item?id=50017139">comment 50017139</a></small></li>
+<li><b>lode</b> &mdash; A couple of VPSes at $10/<b>year</b>, found on LowEndBox. Tailscale exit nodes, Invidious, FreshRSS, Vaultwarden, silly scripts. He treats them as disposable and can rebuild from daily backups. <sup class="c"><a href="#s22">22</a></sup><small><a href="https://news.ycombinator.com/item?id=50017188">comment 50017188</a></small></li>
+<li><b>neilmovva</b> &mdash; Builds Sailboxes, cloud VMs designed to be effectively free when idle &mdash; powerful enough to host a Minecraft server, scaling to near-zero when nothing runs. Also his default environment for coding agents. <sup class="c"><a href="#s23">23</a></sup><small><a href="https://news.ycombinator.com/item?id=50017428">comment 50017428</a></small></li>
+<li><b>Saigonautica</b> &mdash; A searchable database of his physical books, so family and friends can check what he owns, with a crude inter-library search between instances. Also hosts the ebooks so he can load them straight onto a reader. <sup class="c"><a href="#s24">24</a></sup><small><a href="https://news.ycombinator.com/item?id=50015468">comment 50015468</a></small></li>
+<li><b>JamesLeonis</b> &mdash; Two Optiplex 9020s: one on TrueNAS, one a Debian app server. File sharing, BitTorrent seeding and version control (Forgejo) are the long-running applications. <span class="q">&ldquo;Recycling old consumer/SOHO tech is probably the best bang for your buck.&rdquo;</span> <sup class="c"><a href="#s25">25</a></sup><small><a href="https://news.ycombinator.com/item?id=50016625">comment 50016625</a></small></li>
+<li><b>petercooper</b> &mdash; Used a spare VPS as a one-listener internet radio station for his mother, who works with a portable radio and has no interest in Spotify. <sup class="c"><a href="#s26">26</a></sup><small><a href="https://news.ycombinator.com/item?id=50017856">comment 50017856</a></small></li>
+<li><b>dada216</b> &mdash; A VPN in the cloud. At home: TrueNAS and GitLab. For work: an older HP workstation with 24 physical cores for VMs, Kubernetes and Windows AD experiments. <sup class="c"><a href="#s27">27</a></sup><small><a href="https://news.ycombinator.com/item?id=50016686">comment 50016686</a></small></li>
+<li><b>maurits</b> &mdash; Self-hosts his blog &ldquo;because I like having my own little corner on the internet&rdquo;, and originally to learn daily <code>*nix</code> craft. <sup class="c"><a href="#s28">28</a></sup><small><a href="https://news.ycombinator.com/item?id=50017374">comment 50017374</a></small></li>
+<li><b>droidjj</b> &mdash; Type-1 diabetic. Runs Nightscout so his glucose monitor syncs to a Pebble watch. Took about an hour to set up with help from a coding agent. <sup class="c"><a href="#s29">29</a></sup><small><a href="https://news.ycombinator.com/item?id=50014710">comment 50014710</a></small></li>
+<li><b>bthallplz</b> &mdash; Started on PikaPods, then moved to a $5 VPS with CapRover on DigitalOcean. Runs Actual Budget, Wallabag and FreshRSS, plus daily scripts that rebuild static sites and push them to a separate host. <sup class="c"><a href="#s30">30</a></sup><small><a href="https://news.ycombinator.com/item?id=50009354">comment 50009354</a></small></li>
+<li><b>jamiepond</b> &mdash; <code>ssh ssh.cowsinlove.com</code>, an extension of his website. Game coming soon. <sup class="c"><a href="#s31">31</a></sup><small><a href="https://news.ycombinator.com/item?id=50017674">comment 50017674</a></small></li>
+</ol>
+</div>
+</section>
+
+<section>
+<h2>What the thread actually uses them for</h2>
+<p>Mentions of each category across all 372 comments. Bars are scaled to the largest category. These counts are keyword analysis of the fetched page, not an external figure.<sup class="c"><a href="#s32">32</a></sup></p>
+<div class="table">
+<table>
+<tr><th>Category</th><th>Mentions</th></tr>
+<tr><td>VPN / mesh networking &mdash; Tailscale, WireGuard, NetBird, Pangolin, Yggdrasil, OpenVPN</td><td><b>114</b> <span class="bar" style="width:120px"></span></td></tr>
+<tr><td>Torrenting and seedboxes (the &ldquo;Linux ISOs&rdquo;)</td><td><b>52</b> <span class="bar" style="width:54px"></span></td></tr>
+<tr><td>Backups &mdash; restic, Borg, Kopia, offsite copies</td><td><b>45</b> <span class="bar" style="width:47px"></span></td></tr>
+<tr><td>Personal website or blog</td><td><b>39</b> <span class="bar" style="width:41px"></span></td></tr>
+<tr><td>Self-hosted git &mdash; Gitea, Forgejo, GitLab</td><td><b>35</b> <span class="bar" style="width:36px"></span></td></tr>
+<tr><td>SSH bastion, jump host, file shuttle, tunnels</td><td><b>29</b> <span class="bar" style="width:30px"></span></td></tr>
+<tr><td>Media servers &mdash; Jellyfin, Plex, the *arr stack</td><td><b>28</b> <span class="bar" style="width:29px"></span></td></tr>
+<tr><td>AI / LLM agents and inference</td><td><b>28</b> <span class="bar" style="width:29px"></span></td></tr>
+<tr><td>Reverse proxy &mdash; Caddy, Nginx, Traefik</td><td><b>23</b> <span class="bar" style="width:24px"></span></td></tr>
+<tr><td>DNS &mdash; authoritative, Pi-hole, AdGuard</td><td><b>22</b> <span class="bar" style="width:23px"></span></td></tr>
+<tr><td>File sync &mdash; Nextcloud, Syncthing, WebDAV</td><td><b>19</b> <span class="bar" style="width:20px"></span></td></tr>
+<tr><td>Bots &mdash; Discord, Telegram, IRC, Matrix</td><td><b>16</b> <span class="bar" style="width:16px"></span></td></tr>
+<tr><td>Photos &mdash; Immich, Photoprism</td><td><b>15</b> <span class="bar" style="width:15px"></span></td></tr>
+<tr><td>Self-hosted email &mdash; Postfix, Dovecot</td><td><b>14</b> <span class="bar" style="width:14px"></span></td></tr>
+<tr><td>Notes and knowledge &mdash; Joplin, Memos, Outline, Paperless, Bookstack</td><td><b>14</b> <span class="bar" style="width:14px"></span></td></tr>
+<tr><td>Game servers &mdash; Minecraft, Factorio, CS</td><td><b>14</b> <span class="bar" style="width:14px"></span></td></tr>
+<tr><td>Test, staging and dev sandboxes</td><td><b>14</b> <span class="bar" style="width:14px"></span></td></tr>
+<tr><td>Monitoring &mdash; Uptime Kuma, Grafana, Prometheus, Beszel</td><td><b>13</b> <span class="bar" style="width:13px"></span></td></tr>
+<tr><td>RSS readers &mdash; FreshRSS, Miniflux</td><td><b>12</b> <span class="bar" style="width:12px"></span></td></tr>
+<tr><td>Home automation &mdash; Home Assistant</td><td><b>9</b> <span class="bar" style="width:9px"></span></td></tr>
+<tr><td>Task and project management &mdash; Vikunja, Kanban, Taskwarrior</td><td><b>9</b> <span class="bar" style="width:9px"></span></td></tr>
+<tr><td>Password managers &mdash; Vaultwarden</td><td><b>7</b> <span class="bar" style="width:7px"></span></td></tr>
+<tr><td>CI runners and build servers</td><td><b>7</b> <span class="bar" style="width:7px"></span></td></tr>
+<tr><td>File sharing to other people &mdash; Pingvin, PsiTransfer</td><td><b>7</b> <span class="bar" style="width:7px"></span></td></tr>
+<tr><td>Crawlers, scrapers, feed ingestion</td><td><b>6</b> <span class="bar" style="width:6px"></span></td></tr>
+<tr><td>Budgeting &mdash; Actual, Firefly</td><td><b>5</b> <span class="bar" style="width:5px"></span></td></tr>
+<tr><td>Auth and SSO &mdash; Authentik, Authelia, Keycloak</td><td><b>4</b> <span class="bar" style="width:4px"></span></td></tr>
+<tr><td>Calendar and contacts &mdash; Radicale, Baikal</td><td><b>4</b> <span class="bar" style="width:4px"></span></td></tr>
+<tr><td>Video and audio streaming &mdash; Owncast, MediaMTX, Snapcast</td><td><b>3</b> <span class="bar" style="width:3px"></span></td></tr>
+</table>
+</div>
+<div class="warn">
+<p><b>Read the top row carefully.</b> The most-mentioned thing in this thread is not an application at all. It is <b>a network</b> &mdash; Tailscale, WireGuard, NetBird, Pangolin, Yggdrasil. A cheap VPS with a stable public IP turns out to be the cheapest way to reach everything else you own, wherever it lives. Several of the highest-rated comments describe exactly that: the VPS runs only a proxy or a tunnel, and the services sit on a machine at home.</p>
+</div>
+</section>
+
+<section>
+<h2>Three patterns worth taking from it</h2>
+
+<h3>1. The VPS is increasingly a doorway, not a host</h3>
+<p>The application-hosting answer and the networking answer have swapped places over the last few years. People run Immich, Jellyfin and the media stack on hardware they own, because that is where the disk is, and they keep a small cloud VM purely as the fixed point on the public internet: a Caddy reverse proxy, a WireGuard hub, an SSH bastion, a Pangolin or Cloudflare tunnel. The $5 buys an address, not compute.</p>
+
+<h3>2. It rarely stays $5</h3>
+<p>The one admitted escalation in the thread is blunt: started frugal, now about $100&nbsp;a&nbsp;month.<sup class="c"><a href="#s6">6</a></sup> The pattern behind it is continuous ingest workers and nightly jobs &mdash; the moment the box stops being a place you keep things and becomes a place that keeps <i>happening</i>, the bill follows. Several other comments describe the same slope without naming a figure.</p>
+
+<h3>3. The dissent is the most useful comment in the thread</h3>
+<p>One commenter, having actually built the home server, concluded that it was not worth it: another machine to patch, secure, and reason about, for gains that did not cover the cost.<sup class="c"><a href="#s11">11</a></sup> He now carries a flash drive between cheap laptops and pays a service to do his backups. This matters because the thread is otherwise an unbroken run of affirmative answers, which is exactly what the asker invited when he asked what was <i>worth keeping online</i>. A thread that only collects success stories cannot answer the question it asked.</p>
+
+<div class="card">
+<h4>One incidental observation</h4>
+<p>Hermes, the agent framework this page was written with, appears in the thread more than once &mdash; on a mini PC, as a thing someone runs for friends and family, and in a general &ldquo;are all these people saying Hermes bots?&rdquo; One commenter lists &ldquo;Hermes and an Orca dev server&rdquo; as his answer.<sup class="c"><a href="#s1">1</a></sup> Different products may share the name; the thread does not say which.</p>
+</div>
+</section>
+
+<section>
+<h2>What is not in here</h2>
+<ul>
+<li><b>No identities.</b> Only the public HN usernames that appear on the page, and only as attribution.</li>
+<li><b>No verification of claims.</b> Where someone says their VPS costs $4 a year or their bill hit $100 a month, that is what they said, not something checkable from the comment.</li>
+<li><b>No scoring.</b> Hacker News does not rank comments by votes inside a thread, so &ldquo;top 30&rdquo; here means the first 30 top-level comments as served, which is the only ordering the site actually provides.</li>
+</ul>
+</section>
+<footer>Compiled 2026-10-09 from the Hacker News thread &ldquo;What do you run on a $5 VPS that&rsquo;s worth keeping online 24/7?&rdquo; Top-30 summaries are condensation, not quotation; anything inside quote marks is verbatim from the linked comment. Category counts are own analysis and measure mentions, not people.</footer><section id="sources"><h2>Sources</h2><p>Every comment summary above links to the comment it came from.</p><ol class="sources"><li id="s1"><b>S01</b> <a href="https://news.ycombinator.com/item?id=49985548">Ask HN: What do you run on a $5 VPS that&rsquo;s worth keeping online 24/7? &mdash; the thread</a><small>primary &middot; 234 points, 372 comments &middot; accessed 2026-10-09</small></li>
+<li id="s2"><b>S02</b> <a href="https://news.ycombinator.com/item?id=49989237">HN comment by ehe78qhe</a><small>the thread &middot; id 49989237 &middot; accessed 2026-10-09</small></li>
+<li id="s3"><b>S03</b> <a href="https://news.ycombinator.com/item?id=50018231">HN comment by nha1</a><small>top-level comment &middot; id 50018231 &middot; accessed 2026-10-09</small></li>
+<li id="s4"><b>S04</b> <a href="https://news.ycombinator.com/item?id=50015915">HN comment by chr15m</a><small>top-level comment &middot; id 50015915 &middot; accessed 2026-10-09</small></li>
+<li id="s5"><b>S05</b> <a href="https://news.ycombinator.com/item?id=50013773">HN comment by throwaway81523</a><small>top-level comment &middot; id 50013773 &middot; accessed 2026-10-09</small></li>
+<li id="s6"><b>S06</b> <a href="https://news.ycombinator.com/item?id=50017219">HN comment by prolly97</a><small>top-level comment &middot; id 50017219 &middot; accessed 2026-10-09</small></li>
+<li id="s7"><b>S07</b> <a href="https://news.ycombinator.com/item?id=50017900">HN comment by guidedlight</a><small>top-level comment &middot; id 50017900 &middot; accessed 2026-10-09</small></li>
+<li id="s8"><b>S08</b> <a href="https://news.ycombinator.com/item?id=50016133">HN comment by ahf8Aithaex7Nai</a><small>top-level comment &middot; id 50016133 &middot; accessed 2026-10-09</small></li>
+<li id="s9"><b>S09</b> <a href="https://news.ycombinator.com/item?id=50018112">HN comment by huijzer</a><small>top-level comment &middot; id 50018112 &middot; accessed 2026-10-09</small></li>
+<li id="s10"><b>S10</b> <a href="https://news.ycombinator.com/item?id=50014938">HN comment by viceconsole</a><small>top-level comment &middot; id 50014938 &middot; accessed 2026-10-09</small></li>
+<li id="s11"><b>S11</b> <a href="https://news.ycombinator.com/item?id=50017857">HN comment by massysett</a><small>top-level comment &middot; id 50017857 &middot; accessed 2026-10-09</small></li>
+<li id="s12"><b>S12</b> <a href="https://news.ycombinator.com/item?id=50015019">HN comment by nrdvana</a><small>top-level comment &middot; id 50015019 &middot; accessed 2026-10-09</small></li>
+<li id="s13"><b>S13</b> <a href="https://news.ycombinator.com/item?id=50011341">HN comment by bawolff</a><small>top-level comment &middot; id 50011341 &middot; accessed 2026-10-09</small></li>
+<li id="s14"><b>S14</b> <a href="https://news.ycombinator.com/item?id=50017667">HN comment by wraptile</a><small>top-level comment &middot; id 50017667 &middot; accessed 2026-10-09</small></li>
+<li id="s15"><b>S15</b> <a href="https://news.ycombinator.com/item?id=50018205">HN comment by icar</a><small>top-level comment &middot; id 50018205 &middot; accessed 2026-10-09</small></li>
+<li id="s16"><b>S16</b> <a href="https://news.ycombinator.com/item?id=50015888">HN comment by SyzygyRhythm</a><small>top-level comment &middot; id 50015888 &middot; accessed 2026-10-09</small></li>
+<li id="s17"><b>S17</b> <a href="https://news.ycombinator.com/item?id=50015504">HN comment by mjcarden</a><small>top-level comment &middot; id 50015504 &middot; accessed 2026-10-09</small></li>
+<li id="s18"><b>S18</b> <a href="https://news.ycombinator.com/item?id=49988100">HN comment by jbarberu</a><small>top-level comment &middot; id 49988100 &middot; accessed 2026-10-09</small></li>
+<li id="s19"><b>S19</b> <a href="https://news.ycombinator.com/item?id=50017604">HN comment by meteyor</a><small>top-level comment &middot; id 50017604 &middot; accessed 2026-10-09</small></li>
+<li id="s20"><b>S20</b> <a href="https://news.ycombinator.com/item?id=50017488">HN comment by nicbou</a><small>top-level comment &middot; id 50017488 &middot; accessed 2026-10-09</small></li>
+<li id="s21"><b>S21</b> <a href="https://news.ycombinator.com/item?id=50017139">HN comment by voidUpdate</a><small>top-level comment &middot; id 50017139 &middot; accessed 2026-10-09</small></li>
+<li id="s22"><b>S22</b> <a href="https://news.ycombinator.com/item?id=50017188">HN comment by lode</a><small>top-level comment &middot; id 50017188 &middot; accessed 2026-10-09</small></li>
+<li id="s23"><b>S23</b> <a href="https://news.ycombinator.com/item?id=50017428">HN comment by neilmovva</a><small>top-level comment &middot; id 50017428 &middot; accessed 2026-10-09</small></li>
+<li id="s24"><b>S24</b> <a href="https://news.ycombinator.com/item?id=50015468">HN comment by Saigonautica</a><small>top-level comment &middot; id 50015468 &middot; accessed 2026-10-09</small></li>
+<li id="s25"><b>S25</b> <a href="https://news.ycombinator.com/item?id=50016625">HN comment by JamesLeonis</a><small>top-level comment &middot; id 50016625 &middot; accessed 2026-10-09</small></li>
+<li id="s26"><b>S26</b> <a href="https://news.ycombinator.com/item?id=50017856">HN comment by petercooper</a><small>top-level comment &middot; id 50017856 &middot; accessed 2026-10-09</small></li>
+<li id="s27"><b>S27</b> <a href="https://news.ycombinator.com/item?id=50016686">HN comment by dada216</a><small>top-level comment &middot; id 50016686 &middot; accessed 2026-10-09</small></li>
+<li id="s28"><b>S28</b> <a href="https://news.ycombinator.com/item?id=50017374">HN comment by maurits</a><small>top-level comment &middot; id 50017374 &middot; accessed 2026-10-09</small></li>
+<li id="s29"><b>S29</b> <a href="https://news.ycombinator.com/item?id=50014710">HN comment by droidjj</a><small>top-level comment &middot; id 50014710 &middot; accessed 2026-10-09</small></li>
+<li id="s30"><b>S30</b> <a href="https://news.ycombinator.com/item?id=50009354">HN comment by bthallplz</a><small>top-level comment &middot; id 50009354 &middot; accessed 2026-10-09</small></li>
+<li id="s31"><b>S31</b> <a href="https://news.ycombinator.com/item?id=50017674">HN comment by jamiepond</a><small>top-level comment &middot; id 50017674 &middot; accessed 2026-10-09</small></li>
+<li id="s32"><b>S32</b> <a href="https://news.ycombinator.com/item?id=49985548">Keyword counts for the category table</a><small>own analysis of the fetched page, not an external source &middot; accessed 2026-10-09</small></li></ol></section>
+</main></body></html>
