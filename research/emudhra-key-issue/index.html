@@ -1,0 +1,2181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>The Key Was 4</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400..800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap">
+<style>
+/* Layout: one fixed 1600x900 stage, scaled to fit any screen. Every slide is a scene that builds step by step.
+   Colour has meaning everywhere: amber = private/secret, cyan = public, violet = certificate authority, green = verified, red = attacker/broken. */
+:root{
+  --ink:#0A0F1E; --ink2:#10182C; --ink3:#18223D; --line:#2A3658; --line2:#3A4874;
+  --paper:#EDF0F7; --mute:#8E9AB9; --dim:#5B6789;
+  --priv:#FFB547; --pub:#56C2FF; --ca:#B79CFF; --ok:#3EDC8E; --bad:#FF4F6A;
+  --priv-a:rgba(255,181,71,.14); --pub-a:rgba(86,194,255,.13); --ca-a:rgba(183,156,255,.14); --ok-a:rgba(62,220,142,.13); --bad-a:rgba(255,79,106,.15);
+  --f-display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --ease:cubic-bezier(.2,.8,.2,1);
+  color-scheme:dark;
+}
+[hidden]{display:none !important}
+html,body{height:100%}
+body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--f-body);overflow:hidden;box-sizing:border-box;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  -webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
+#viewport{position:relative;width:100%;height:100%;overflow:hidden;cursor:default}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center center;background:var(--ink)}
+
+/* ---------- slide base ---------- */
+.slide{position:absolute;inset:0;padding:64px 110px 0;box-sizing:border-box;opacity:0;visibility:hidden;
+  transition:opacity .45s ease,visibility 0s linear .45s;overflow:hidden}
+.slide.active{opacity:1;visibility:visible;transition:opacity .45s ease}
+.eyebrow{font:500 15px/1 var(--f-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--mute);display:flex;gap:14px;align-items:center}
+.eyebrow .n{color:var(--paper);background:var(--ink3);border:1px solid var(--line);padding:6px 9px;border-radius:4px;letter-spacing:.06em}
+h1,h2,h3{font-family:var(--f-display);margin:0;text-wrap:balance;letter-spacing:-.012em}
+h2{font-size:56px;line-height:1.04;font-weight:700;margin-top:16px;max-width:1340px}
+h3{font-size:30px;font-weight:650;line-height:1.15}
+p{margin:0}
+.lead{font-size:27px;line-height:1.42;color:var(--mute);max-width:1100px;margin-top:18px}
+.scene{position:absolute;left:110px;right:110px;top:236px;bottom:118px}
+.cap{position:absolute;left:110px;right:110px;bottom:46px;min-height:58px;display:flex;align-items:flex-end}
+.cap > *{position:absolute;left:0;bottom:0;right:0;font-size:27px;line-height:1.35;font-weight:500;color:var(--paper);padding-left:22px;border-left:3px solid var(--priv)}
+.cap .bad{border-color:var(--bad)} .cap .ok{border-color:var(--ok)} .cap .ca{border-color:var(--ca)} .cap .pub{border-color:var(--pub)}
+.mono{font-family:var(--f-mono)}
+.c-priv{color:var(--priv)} .c-pub{color:var(--pub)} .c-ca{color:var(--ca)} .c-ok{color:var(--ok)} .c-bad{color:var(--bad)} .c-mute{color:var(--mute)}
+b,strong{font-weight:600}
+sup{font-size:.6em;line-height:0}
+a{color:var(--pub)}
+
+/* ---------- step builds ---------- */
+.slide [data-at]{transition:opacity .6s var(--ease),transform .75s var(--ease),filter .6s,color .5s,background-color .5s,border-color .5s,box-shadow .5s}
+.slide [data-at]:not(.keep){opacity:0}
+.slide [data-at].in{opacity:1}
+.slide .up[data-at]:not(.in){transform:translateY(26px)}
+.slide .down[data-at]:not(.in){transform:translateY(-26px)}
+.slide .left[data-at]:not(.in){transform:translateX(-46px)}
+.slide .right[data-at]:not(.in){transform:translateX(46px)}
+.slide .pop[data-at]:not(.in){transform:scale(.55)}
+.slide .zoom[data-at]:not(.in){transform:scale(1.6);filter:blur(8px)}
+.slide .blur[data-at]:not(.in){filter:blur(10px)}
+.slide [data-out].gone{opacity:0 !important;pointer-events:none}
+.slide .draw{stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset 1s var(--ease),opacity .3s,stroke .5s}
+.slide .draw[data-at]{opacity:1}
+.slide .draw.in{stroke-dashoffset:0}
+.slide .draw.slow{transition-duration:1.8s}
+[data-pos]{position:absolute;left:0;top:0;transition:transform 1s var(--ease),opacity .6s var(--ease),color .5s,background-color .6s,border-color .5s}
+.dim-after.dimmed{opacity:.32 !important}
+
+/* ---------- icons + actors ---------- */
+.ico{width:1em;height:1em;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;vertical-align:middle;overflow:visible}
+.actor{position:absolute;width:160px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}
+.actor .ico{font-size:96px}
+.actor .nm{font:600 21px/1.2 var(--f-body)}
+.actor .sub{font:400 15px/1.25 var(--f-mono);color:var(--mute);letter-spacing:.02em}
+.actor.you{color:var(--pub)} .actor.bank{color:var(--ok)} .actor.mal{color:var(--bad)} .actor.ca{color:var(--ca)}
+.actor .nm{color:var(--paper)}
+.chip{display:inline-flex;align-items:center;gap:8px;font:500 18px/1 var(--f-mono);padding:9px 13px;border-radius:6px;border:1px solid var(--line2);background:var(--ink2);color:var(--paper);white-space:nowrap}
+.chip.priv{border-color:var(--priv);color:var(--priv);background:var(--priv-a)}
+.chip.pub{border-color:var(--pub);color:var(--pub);background:var(--pub-a)}
+.chip.ca{border-color:var(--ca);color:var(--ca);background:var(--ca-a)}
+.chip.ok{border-color:var(--ok);color:var(--ok);background:var(--ok-a)}
+.chip.bad{border-color:var(--bad);color:var(--bad);background:var(--bad-a)}
+.chip .ico{font-size:22px}
+.tok{display:flex;flex-direction:column;align-items:center;gap:6px;font:500 15px/1.2 var(--f-mono);text-align:center}
+.tok .ico{font-size:58px}
+.panel{background:var(--ink2);border:1px solid var(--line);border-radius:12px}
+.label{font:500 14px/1.2 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.wire{stroke:var(--line2);stroke-width:3;fill:none}
+.wire.dash{stroke-dasharray:8 10}
+svg.over{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+.badge{display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border-radius:50%;font:700 26px/1 var(--f-body)}
+.badge.ok{background:var(--ok);color:var(--ink)} .badge.bad{background:var(--bad);color:var(--ink)}
+
+/* ---------- certificate card ---------- */
+.cert{position:absolute;width:520px;background:linear-gradient(180deg,#141d35,#10172b);border:1px solid var(--line2);border-radius:14px;overflow:hidden;box-shadow:0 30px 60px -30px rgba(0,0,0,.8)}
+.cert .ch{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;border-bottom:1px solid var(--line);font:500 14px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.cert .ch .ico{font-size:30px;color:var(--ca)}
+.cert .row{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:12px 20px;border-bottom:1px dashed var(--line);font-size:19px;align-items:baseline}
+.cert .row:last-child{border-bottom:0}
+.cert .row > span:first-child{font:500 13px/1.3 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.cert .row > span:last-child{font-family:var(--f-mono);font-size:18px;word-break:break-all;min-width:0}
+.cert.sm{width:330px}
+.cert.sm .row{grid-template-columns:96px 1fr;font-size:15px;padding:8px 14px}
+.cert.sm .row > span:last-child{font-size:15px}
+.cert.sm .ch{padding:10px 14px;font-size:12px}
+.cert.bad{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad),0 30px 60px -30px rgba(255,79,106,.5)}
+
+/* ---------- chapter cards ---------- */
+.chapter{display:flex;flex-direction:column;justify-content:center;padding-left:160px}
+.chapter canvas.guilloche{position:absolute;right:-120px;top:50%;width:900px;height:900px;transform:translateY(-50%);opacity:.55}
+.chapter .num{font:700 230px/0.8 var(--f-display);color:var(--ink3);-webkit-text-stroke:2px var(--line2);letter-spacing:-.04em}
+.chapter h2{font-size:96px;margin-top:20px;max-width:900px;position:relative}
+.chapter .lead{position:relative}
+
+/* ---------- HUD (inside stage) ---------- */
+#hud{position:absolute;left:110px;right:110px;bottom:0;height:40px;display:flex;align-items:center;justify-content:space-between;font:500 13px/1 var(--f-mono);color:var(--dim);letter-spacing:.12em;text-transform:uppercase;z-index:50;pointer-events:none}
+#hud .dots{display:flex;gap:6px;margin-right:16px}
+#hud .dots i{width:7px;height:7px;border-radius:50%;background:var(--line);transition:background .3s}
+#hud .dots i.on{background:var(--priv)}
+#hud .right{display:flex;align-items:center}
+#bar{position:absolute;left:0;bottom:0;height:3px;background:var(--priv);z-index:51;transition:width .4s var(--ease)}
+
+/* ---------- notes / help overlay (outside stage, not scaled) ---------- */
+#notes{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));width:min(860px,calc(100% - 32px));box-sizing:border-box;background:rgba(16,24,44,.96);border:1px solid var(--line2);border-radius:12px;padding:16px 20px;font:15px/1.5 var(--f-body);color:var(--paper);z-index:100;box-shadow:0 20px 50px rgba(0,0,0,.6)}
+#notes .label{margin-bottom:6px}
+#help{position:fixed;inset:0;display:grid;place-items:center;background:rgba(6,9,18,.82);z-index:120}
+#help .panel{padding:28px 34px;max-width:min(520px,calc(100% - 32px));box-sizing:border-box;font-size:16px;line-height:1.6}
+#help kbd{font:500 13px var(--f-mono);border:1px solid var(--line2);border-bottom-width:2px;border-radius:5px;padding:2px 7px;background:var(--ink3)}
+#help table{border-collapse:collapse;margin-top:10px} #help td{padding:5px 14px 5px 0;vertical-align:top}
+#toast{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top,0px));transform:translateX(-50%);font:500 13px/1 var(--f-mono);letter-spacing:.06em;color:var(--mute);background:rgba(16,24,44,.92);border:1px solid var(--line);padding:10px 14px;border-radius:999px;z-index:110;transition:opacity .8s;white-space:nowrap;max-width:calc(100% - 32px);overflow:hidden;text-overflow:ellipsis}
+#toast.hide{opacity:0}
+#navbtns{position:fixed;right:calc(14px + env(safe-area-inset-right,0px));bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;z-index:105}
+#navbtns button{width:44px;height:44px;border-radius:50%;border:1px solid var(--line2);background:rgba(16,24,44,.85);color:var(--paper);font:600 18px/1 var(--f-body);cursor:pointer;opacity:.35;transition:opacity .3s}
+#navbtns button:hover,#navbtns button:focus-visible{opacity:1;outline:2px solid var(--pub);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){
+  .slide [data-at],[data-pos],.slide .draw{transition-duration:.25s !important}
+  .slide *{animation-duration:.01s !important;animation-delay:0s !important}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-laptop" viewBox="0 0 64 64"><rect x="10" y="12" width="44" height="30" rx="3"/><path d="M4 50h56l-4-8H8z"/></symbol>
+<symbol id="i-server" viewBox="0 0 64 64"><rect x="12" y="8" width="40" height="14" rx="2"/><rect x="12" y="25" width="40" height="14" rx="2"/><rect x="12" y="42" width="40" height="14" rx="2"/><path d="M19 15h.01M19 32h.01M19 49h.01M28 15h16M28 32h16M28 49h16"/></symbol>
+<symbol id="i-hacker" viewBox="0 0 64 64"><path d="M12 60c0-13 8-21 20-21s20 8 20 21"/><path d="M17 33c0-15 6-27 15-27s15 12 15 27c0 4-2 7-6 7H23c-4 0-6-3-6-7z"/><path d="M24 27l6 2M40 27l-6 2"/></symbol>
+<symbol id="i-key" viewBox="0 0 64 64"><circle cx="18" cy="32" r="11"/><circle cx="18" cy="32" r="3"/><path d="M29 32h28M50 32v9M57 32v6M42 32v6"/></symbol>
+<symbol id="i-lock" viewBox="0 0 64 64"><rect x="13" y="28" width="38" height="29" rx="4"/><path d="M21 28v-8a11 11 0 0 1 22 0v8"/><path d="M32 39v8"/></symbol>
+<symbol id="i-lock-open" viewBox="0 0 64 64"><rect x="13" y="28" width="38" height="29" rx="4"/><path d="M21 28V17a11 11 0 0 1 21-5"/><path d="M32 39v8"/></symbol>
+<symbol id="i-seal" viewBox="0 0 64 64"><circle cx="32" cy="26" r="17"/><circle cx="32" cy="26" r="9"/><path d="M22 40l-6 19 9-4 5 7 2-14M42 40l6 19-9-4-5 7"/></symbol>
+<symbol id="i-eye" viewBox="0 0 64 64"><path d="M4 32s10-16 28-16 28 16 28 16-10 16-28 16S4 32 4 32z"/><circle cx="32" cy="32" r="7"/></symbol>
+<symbol id="i-check" viewBox="0 0 64 64"><path d="M14 34l12 12 24-26"/></symbol>
+<symbol id="i-x" viewBox="0 0 64 64"><path d="M18 18l28 28M46 18 18 46"/></symbol>
+<symbol id="i-ca" viewBox="0 0 64 64"><path d="M8 24 32 9l24 15z"/><path d="M14 28v20M24 28v20M40 28v20M50 28v20M8 52h48M5 58h54"/><circle cx="32" cy="37" r="5"/></symbol>
+<symbol id="i-vault" viewBox="0 0 64 64"><rect x="8" y="9" width="48" height="44" rx="4"/><circle cx="32" cy="31" r="11"/><circle cx="32" cy="31" r="3"/><path d="M32 20v4M32 38v4M21 31h4M39 31h4M15 53v5M49 53v5"/></symbol>
+<symbol id="i-doc" viewBox="0 0 64 64"><path d="M16 6h22l12 12v40H16z"/><path d="M38 6v12h12M22 30h20M22 38h20M22 46h12"/></symbol>
+<symbol id="i-wifi" viewBox="0 0 64 64"><path d="M6 26a37 37 0 0 1 52 0M15 35a24 24 0 0 1 34 0M24 44a11 11 0 0 1 16 0"/><circle cx="32" cy="52" r="2.5"/></symbol>
+<symbol id="i-router" viewBox="0 0 64 64"><rect x="8" y="34" width="48" height="16" rx="3"/><path d="M18 34 12 14M46 34l6-20M17 42h.01M25 42h.01M36 42h12"/></symbol>
+<symbol id="i-globe" viewBox="0 0 64 64"><circle cx="32" cy="32" r="24"/><path d="M8 32h48M32 8c9 8 9 40 0 48M32 8c-9 8-9 40 0 48M12 20h40M12 44h40"/></symbol>
+<symbol id="i-box" viewBox="0 0 64 64"><path d="M8 22 32 10l24 12v24L32 58 8 46z"/><path d="M8 22l24 12 24-12M32 34v24"/></symbol>
+<symbol id="i-dice" viewBox="0 0 64 64"><rect x="10" y="10" width="44" height="44" rx="9"/><circle cx="22" cy="22" r="2.5"/><circle cx="42" cy="22" r="2.5"/><circle cx="32" cy="32" r="2.5"/><circle cx="22" cy="42" r="2.5"/><circle cx="42" cy="42" r="2.5"/></symbol>
+<symbol id="i-browser" viewBox="0 0 64 64"><rect x="5" y="10" width="54" height="44" rx="4"/><path d="M5 22h54M12 16h.01M18 16h.01M24 16h.01"/></symbol>
+<symbol id="i-chip" viewBox="0 0 64 64"><rect x="17" y="17" width="30" height="30" rx="3"/><path d="M25 9v8M32 9v8M39 9v8M25 47v8M32 47v8M39 47v8M9 25h8M9 32h8M9 39h8M47 25h8M47 32h8M47 39h8"/></symbol>
+<symbol id="i-alert" viewBox="0 0 64 64"><path d="M32 8 60 56H4z"/><path d="M32 26v14M32 47v.01"/></symbol>
+<symbol id="i-pkg" viewBox="0 0 64 64"><rect x="8" y="16" width="48" height="40" rx="3"/><path d="M8 28h48M24 16v12M40 16v12M14 8h36l6 8H8z"/></symbol>
+<symbol id="i-term" viewBox="0 0 64 64"><rect x="5" y="10" width="54" height="44" rx="4"/><path d="M15 26l8 6-8 6M28 40h14"/></symbol>
+<symbol id="i-mail" viewBox="0 0 64 64"><rect x="6" y="14" width="52" height="36" rx="4"/><path d="M6 18l26 18 26-18"/></symbol>
+<symbol id="i-swap" viewBox="0 0 64 64"><path d="M10 22h40l-9-9M54 42H14l9 9"/></symbol>
+<symbol id="i-cpu" viewBox="0 0 64 64"><rect x="6" y="12" width="52" height="34" rx="3"/><path d="M22 54h20M32 46v8"/></symbol>
+<symbol id="i-phone" viewBox="0 0 64 64"><rect x="18" y="4" width="28" height="56" rx="5"/><path d="M28 52h8"/></symbol>
+<symbol id="i-book" viewBox="0 0 64 64"><path d="M8 12h18a6 6 0 0 1 6 6v38a5 5 0 0 0-5-5H8zM56 12H38a6 6 0 0 0-6 6v38a5 5 0 0 1 5-5h19z"/></symbol>
+</defs>
+</svg>
+<div id="viewport"><div id="stage">
+<style>
+#s-title{padding:0}
+#s-title canvas.guilloche{position:absolute;left:-260px;top:-180px;width:1260px;height:1260px;opacity:.38}
+#s-title .tw{position:absolute;left:110px;top:150px;width:800px}
+#s-title .mega{font-size:168px;line-height:.88;font-weight:800;letter-spacing:-.03em;margin-top:34px}
+#s-title .lead{font-size:26px;max-width:700px;margin-top:34px}
+#s-title .keybox{position:absolute;left:960px;top:170px;width:530px;height:560px;border:1px solid var(--line2);border-radius:16px;background:rgba(16,24,44,.7);padding:26px 28px;box-sizing:border-box;overflow:hidden}
+#s-title .keybox .label{display:flex;justify-content:space-between}
+#title-digits{margin-top:22px;display:flex;flex-wrap:wrap;gap:4px 0;font:500 30px/1.45 var(--f-mono);color:var(--priv)}
+#title-digits span{width:1.0ch;display:inline-block;text-align:center;transition:transform 1.1s cubic-bezier(.5,0,.8,.3),opacity 1s}
+#title-digits span.fall{transform:translateY(520px) rotate(40deg);opacity:0}
+#s-title .big4{position:absolute;left:0;right:0;top:110px;text-align:center;font:800 360px/1 var(--f-display);color:var(--priv);opacity:0;transform:scale(.3);transition:transform 1s var(--ease),opacity .6s;text-shadow:0 0 80px rgba(255,181,71,.35)}
+#s-title .big4.show{opacity:1;transform:none}
+#s-title .k4note{position:absolute;left:28px;right:28px;bottom:24px;font:500 15px/1.4 var(--f-mono);color:var(--mute);opacity:0;transition:opacity .8s .6s}
+#s-title .big4.show ~ .k4note{opacity:1}
+
+#s-hook .longkey{font:500 33px/1.45 var(--f-mono);color:var(--priv);word-break:break-all;max-width:1380px;margin-top:20px;letter-spacing:.02em}
+#s-hook .row{margin-top:38px}
+#s-hook .q{font-size:30px;color:var(--mute)}
+#s-hook .small4{font:800 220px/1 var(--f-display);color:var(--bad);position:absolute;right:120px;top:300px;text-shadow:0 0 90px rgba(255,79,106,.4)}
+#s-hook .longkey.shrink{opacity:.18;filter:blur(1px);transition:opacity .8s,filter .8s}
+
+#s-map .chap{display:grid;grid-template-columns:120px 1fr;gap:6px 0;align-items:baseline;padding:22px 0;border-bottom:1px solid var(--line)}
+#s-map .chap .k{font:700 64px/1 var(--f-display);color:var(--line2)}
+#s-map .chap h3{font-size:36px}
+#s-map .chap p{grid-column:2;color:var(--mute);font-size:21px}
+#s-map .list{margin-top:26px;max-width:1100px}
+#s-map .chap.hot .k{color:var(--priv)}
+
+#s-path .node .ico{font-size:82px}
+#s-path .pkt{top:58px;animation:none}
+#s-path .pkt.in{animation:pkthop 5.2s var(--ease) forwards}
+@keyframes pkthop{0%{transform:translateX(20px)}14%{transform:translateX(20px)}26%{transform:translateX(264px)}40%{transform:translateX(508px)}54%{transform:translateX(752px)}68%{transform:translateX(996px)}84%,100%{transform:translateX(1210px)}}
+#s-path .eye{position:absolute;top:-6px;width:160px;text-align:center;color:var(--bad);font-size:40px}
+#s-path .eye small{display:block;font:500 13px/1.2 var(--f-mono);letter-spacing:.08em;color:var(--bad);margin-top:2px}
+
+.needs{display:grid;grid-template-columns:repeat(3,1fr);gap:40px;position:absolute;left:0;right:0;top:10px}
+.need{padding:34px 32px;border-radius:14px;border:1px solid var(--line);background:var(--ink2);min-height:280px}
+.need .ico{font-size:64px}
+.need h3{margin-top:20px;font-size:38px}
+.need p{margin-top:12px;font-size:22px;color:var(--mute);line-height:1.45}
+.need[data-s="hot"]{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad),0 0 60px -10px rgba(255,79,106,.45)}
+.need[data-s="hot"] h3{color:var(--bad)}
+
+.speech{position:absolute;font:500 18px/1.35 var(--f-body);background:var(--ink3);border:1px solid var(--line2);border-radius:12px;padding:12px 16px;max-width:300px;color:var(--paper)}
+.speech.bad{border-color:var(--bad);background:var(--bad-a)}
+.speech.ok{border-color:var(--ok);background:var(--ok-a)}
+
+#s-sign .doc{position:absolute;left:0;top:10px;width:560px;padding:30px 34px;border-radius:14px;background:#EEF0F6;color:#121a2e;box-shadow:0 30px 60px -25px rgba(0,0,0,.8)}
+#s-sign .doc .label{color:#5a6584}
+#s-sign .doc .dmsg{font:600 32px/1.35 var(--f-display);margin-top:14px;letter-spacing:-.01em}
+#s-sign .doc .from{font:500 18px/1.3 var(--f-mono);margin-top:18px;color:#3b4565}
+#s-sign .swap{display:inline-grid}
+#s-sign .swap > span{grid-area:1/1}
+#s-sign .stamp{position:absolute;right:26px;bottom:18px;font-size:92px;color:#D98E1C;transform:rotate(-12deg)}
+#s-sign .stamp.pop[data-at]:not(.in){transform:scale(2.2) rotate(-30deg)}
+#s-sign .stamp .ico{stroke-width:3.5}
+#s-sign .res{position:absolute;left:660px;width:720px;display:flex;gap:18px;align-items:center;font-size:24px;line-height:1.35}
+#s-sign .res .badge{flex:none}
+
+#s-ring svg{position:absolute;left:-10px;top:-20px;width:600px;height:600px;overflow:visible}
+#s-ring .rdot{fill:var(--ink3);stroke:var(--line2);stroke-width:2}
+#s-ring .rlbl{font:500 15px var(--f-mono);fill:var(--mute);text-anchor:middle;dominant-baseline:middle}
+#s-ring .rdot.g{fill:var(--paper);stroke:var(--paper)}
+#s-ring .rdot.hit{fill:var(--pub);stroke:var(--pub)}
+#s-ring .rlbl.hit{fill:var(--pub);font-weight:600}
+#s-ring .jump{fill:none;stroke:var(--priv);stroke-width:2.5;opacity:.85}
+#s-ring .jn{font:600 14px var(--f-mono);fill:var(--priv);text-anchor:middle}
+#s-ring .txt{position:absolute;left:660px;right:0;top:0}
+#s-ring .txt > div{position:absolute;left:0;right:0;top:0;font-size:26px;line-height:1.45}
+#s-ring .txt h3{font-size:34px;margin-bottom:14px}
+#s-ring .trials{font:500 22px/1.65 var(--f-mono);margin-top:16px;display:grid;grid-template-columns:repeat(2,auto);justify-content:start;gap:0 50px}
+#s-ring .trials span{transition:opacity .3s}
+#s-ring .ctr{position:absolute;left:220px;top:236px;width:120px;text-align:center}
+#s-ring .ctr .big{font:700 64px/1 var(--f-display);color:var(--priv)}
+
+#s-big .rows{position:absolute;left:0;right:0;top:0}
+#s-big .r{display:grid;grid-template-columns:360px 1fr;align-items:center;height:70px;gap:24px}
+#s-big .r .nm{font-size:21px;line-height:1.25;text-align:right;color:var(--paper)}
+#s-big .r .track{position:relative;height:30px}
+#s-big .bar{position:absolute;left:0;top:0;height:30px;border-radius:3px;background:var(--line2);transform-origin:left center;transition:transform 1.4s var(--ease),opacity .4s}
+#s-big .bar[data-at]{opacity:1}
+#s-big .bar[data-at]:not(.in){transform:scaleX(0)}
+#s-big .val{position:absolute;top:2px;font:600 22px/1 var(--f-mono);white-space:nowrap}
+#s-big .r.k .bar{background:var(--priv)} #s-big .r.k .val{color:var(--priv)}
+#s-big .r.e .bar{background:var(--bad)} #s-big .r.e .val{color:var(--bad)} #s-big .r.e .nm{color:var(--bad);font-weight:600}
+#s-big .axis{position:absolute;left:384px;right:0;top:-34px;font:500 13px var(--f-mono);color:var(--dim);letter-spacing:.1em;text-transform:uppercase}
+</style>
+
+<!-- ============ 1. TITLE ============ -->
+<section class="slide" id="s-title" data-steps="0">
+  <aside class="notes">Open with the punchline. A key that protects the web should be a 116-digit random number. One of eMudhra's was 4. Let the animation finish before speaking.</aside>
+  <canvas class="guilloche" data-color="183,156,255" data-seed="3"></canvas>
+  <div class="tw">
+    <div class="eyebrow"><span class="n">eMudhra</span> October 2026 · from first principles</div>
+    <h1 class="mega">The key<br>was <span class="c-priv">4</span>.</h1>
+    <p class="lead">How weak keys at one certificate authority could have let anyone pretend to be any website, and how the internet fixed it in 72 hours.</p>
+  </div>
+  <div class="keybox">
+    <div class="label"><span>CA private key · P-384</span><span id="title-state">expected</span></div>
+    <div id="title-digits"></div>
+    <div class="big4" id="title-big4">4</div>
+    <div class="k4note">One of eMudhra's real certificate-authority private keys.</div>
+  </div>
+</section>
+
+<!-- ============ 2. HOOK ============ -->
+<section class="slide" id="s-hook">
+  <aside class="notes">Read the long number slowly to show how long it is. Then the 4. Ask the room: how many guesses would you need?</aside>
+  <div class="eyebrow">The story in one picture</div>
+  <h2>Every padlock in your browser rests on secret numbers.</h2>
+  <div class="row up" data-at="1">
+    <p class="q">A certificate authority's secret key should be a random number like this (116 digits):</p>
+    <div class="longkey" id="hook-long">27324745105062160777777349260269379510652796200558944916836847314423835404913747899415477564513305416868158069038732</div>
+  </div>
+  <div class="row up" data-at="2"><p class="q">In October 2026, someone found that one of eMudhra's secret keys was:</p></div>
+  <div class="small4 zoom" data-at="2">4</div>
+  <div class="cap"><p class="bad up" data-at="3">That is not a typo. Let's build up, from zero, why this one number put the whole web at risk.</p></div>
+</section>
+
+<!-- ============ 3. MAP ============ -->
+<section class="slide" id="s-map">
+  <aside class="notes">Five chapters. The first three are general knowledge that everyone needs. Chapter four is the incident. Chapter five is the repair.</aside>
+  <div class="eyebrow">The route</div>
+  <h2>Five steps from "what is a key?" to "the key was 4"</h2>
+  <div class="list">
+    <div class="chap up" data-at="1"><span class="k">1</span><h3>Talking in public</h3><p>Secret keys, public keys and signatures</p></div>
+    <div class="chap up" data-at="2"><span class="k">2</span><h3>Who are you, really?</h3><p>Certificates and certificate authorities</p></div>
+    <div class="chap up" data-at="3"><span class="k">3</span><h3>The handshake</h3><p>What happens in the first milliseconds of every HTTPS connection</p></div>
+    <div class="chap up hot" data-at="4"><span class="k">4</span><h3>The key was 4</h3><p>What eMudhra got wrong, and what an attacker could do with it</p></div>
+    <div class="chap up" data-at="5"><span class="k">5</span><h3>The cleanup</h3><p>How Chrome, Firefox, Apple, Microsoft and open-source software un-trusted the keys</p></div>
+  </div>
+</section>
+
+<!-- ============ CH 1 ============ -->
+<section class="slide chapter" id="s-ch1" data-steps="0">
+  <canvas class="guilloche" data-color="86,194,255" data-seed="1"></canvas>
+  <div class="num">1</div>
+  <h2>Talking in public</h2>
+  <p class="lead">Before certificates, we need three ideas: a shared secret, a key pair, and a signature.</p>
+</section>
+
+<!-- ============ PATH ============ -->
+<section class="slide" id="s-path">
+  <aside class="notes">Your message does not go straight to the bank. It is passed hand to hand. Any of these hands can read it or change it, and one of them could be an attacker, for example a fake café Wi-Fi.</aside>
+  <div class="eyebrow"><span class="n">1</span> Talking in public</div>
+  <h2>Your message travels through many strangers' hands</h2>
+  <div class="scene">
+    <svg class="over"><line class="wire draw slow" data-at="1" pathLength="1" x1="80" y1="168" x2="1300" y2="168"/></svg>
+    <div class="actor you node" style="left:0;top:120px"><svg class="ico"><use href="#i-laptop"/></svg><span class="nm">You</span><span class="sub">laptop / phone</span></div>
+    <div class="actor node up" data-at="1" style="left:244px;top:120px;color:var(--mute)" data-out="4"><svg class="ico"><use href="#i-wifi"/></svg><span class="nm">Café Wi-Fi</span><span class="sub">hotspot</span></div>
+    <div class="actor mal node pop" data-at="4" style="left:244px;top:120px"><svg class="ico"><use href="#i-hacker"/></svg><span class="nm c-bad">Fake Wi-Fi</span><span class="sub">"Free_Airport_WiFi"</span></div>
+    <div class="actor node up" data-at="1" style="left:488px;top:120px;color:var(--mute);transition-delay:.1s"><svg class="ico"><use href="#i-router"/></svg><span class="nm">Your ISP</span><span class="sub">internet provider</span></div>
+    <div class="actor node up" data-at="1" style="left:732px;top:120px;color:var(--mute);transition-delay:.2s"><svg class="ico"><use href="#i-globe"/></svg><span class="nm">Backbone</span><span class="sub">cables, exchanges</span></div>
+    <div class="actor node up" data-at="1" style="left:976px;top:120px;color:var(--mute);transition-delay:.3s"><svg class="ico"><use href="#i-router"/></svg><span class="nm">Hosting network</span><span class="sub">data centre</span></div>
+    <div class="actor bank node up" data-at="1" style="left:1220px;top:120px;transition-delay:.4s"><svg class="ico"><use href="#i-server"/></svg><span class="nm">bank.com</span><span class="sub">server</span></div>
+    <div class="chip pkt" data-at="2" style="position:absolute;left:0">PIN = 4821</div>
+    <div class="eye pop" data-at="3" style="left:244px;transition-delay:0s"><svg class="ico"><use href="#i-eye"/></svg><small>can read</small></div>
+    <div class="eye pop" data-at="3" style="left:488px;transition-delay:.15s"><svg class="ico"><use href="#i-eye"/></svg><small>can copy</small></div>
+    <div class="eye pop" data-at="3" style="left:732px;transition-delay:.3s"><svg class="ico"><use href="#i-eye"/></svg><small>can change</small></div>
+    <div class="eye pop" data-at="3" style="left:976px;transition-delay:.45s"><svg class="ico"><use href="#i-eye"/></svg><small>can record</small></div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">The internet is a chain of machines that pass your data along, like a bucket brigade.</p>
+    <p class="up" data-at="2" data-out="3">Your message hops from machine to machine before it reaches the bank.</p>
+    <p class="up" data-at="3" data-out="4">Every machine on the path can read it, copy it, or change it.</p>
+    <p class="bad up" data-at="4">And any one of them could be an attacker. You cannot see which.</p>
+  </div>
+</section>
+
+<!-- ============ THREE NEEDS ============ -->
+<section class="slide" id="s-needs">
+  <aside class="notes">Three goals of HTTPS. Encryption gives secrecy and integrity. Certificates give identity. eMudhra's mistake attacked identity.</aside>
+  <div class="eyebrow"><span class="n">1</span> Talking in public</div>
+  <h2>So a safe conversation needs three things</h2>
+  <div class="scene">
+    <div class="needs">
+      <div class="need up" data-at="1"><svg class="ico c-priv"><use href="#i-lock"/></svg><h3>Secrecy</h3><p>Nobody on the path can read the message.</p></div>
+      <div class="need up" data-at="2"><svg class="ico c-ok"><use href="#i-check"/></svg><h3>Integrity</h3><p>Nobody can change the message without being caught.</p></div>
+      <div class="need up" data-at="3" data-st="4:hot"><svg class="ico c-pub"><use href="#i-eye"/></svg><h3>Identity</h3><p>You are talking to the real bank, not someone pretending to be the bank.</p></div>
+    </div>
+  </div>
+  <div class="cap">
+    <p class="bad up" data-at="4">Encryption gives the first two. Certificates give the third. eMudhra's mistake broke the third, for every website.</p>
+  </div>
+</section>
+
+<!-- ============ SYMMETRIC ============ -->
+<section class="slide" id="s-sym">
+  <aside class="notes">Idea one: one key both locks and unlocks. It works well, but the key must reach the other side first, and the path is full of strangers.</aside>
+  <div class="eyebrow"><span class="n">1</span> Talking in public</div>
+  <h2>Idea 1: one shared key that locks and unlocks</h2>
+  <div class="scene">
+    <svg class="over"><line class="wire" x1="170" y1="108" x2="1220" y2="108"/><line class="wire dash" x1="690" y1="108" x2="690" y2="300"/></svg>
+    <div class="actor you" style="left:0;top:60px"><svg class="ico"><use href="#i-laptop"/></svg><span class="nm">You</span></div>
+    <div class="actor bank" style="left:1220px;top:60px"><svg class="ico"><use href="#i-server"/></svg><span class="nm">bank.com</span></div>
+    <div class="actor mal" style="left:610px;top:300px"><svg class="ico"><use href="#i-hacker"/></svg><span class="nm">Mallory</span><span class="sub">on the path</span></div>
+    <div class="tok c-priv pop" data-at="1" style="position:absolute;left:30px;top:250px"><svg class="ico"><use href="#i-key"/></svg>shared key</div>
+    <div class="tok c-priv pop" data-at="1" data-out="5" style="position:absolute;left:1250px;top:250px"><svg class="ico"><use href="#i-key"/></svg>same key</div>
+    <div class="chip" data-at="1" data-out="2" data-pos="0:200,24">HELLO</div>
+    <div class="chip priv" data-at="2" data-out="5" data-pos="2:200,24;3:1010,24" data-scramble="X7#qL·9!">X7#qL·9!</div>
+    <div class="speech pop" data-at="3" data-out="5" style="left:780px;top:330px">I see only: <span class="mono c-priv">X7#qL·9!</span></div>
+    <div class="chip ok pop" data-at="4" data-out="5" style="position:absolute;left:1060px;top:-40px">HELLO</div>
+    <div class="tok c-priv" data-at="5" data-pos="5:30,250;6:1250,250"><svg class="ico"><use href="#i-key"/></svg>key in transit</div>
+    <div class="tok c-bad" data-at="6" data-pos="5:630,90;6:470,320"><svg class="ico"><use href="#i-key"/></svg>Mallory's copy</div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">You and the bank both hold the same secret key.</p>
+    <p class="up" data-at="2" data-out="3">The key scrambles your message into nonsense.</p>
+    <p class="up" data-at="3" data-out="4">Mallory sees only nonsense on the wire.</p>
+    <p class="ok up" data-at="4" data-out="5">The bank uses the same key to unscramble it. This is fast and strong.</p>
+    <p class="up" data-at="5" data-out="6">But how did the bank get the key? It had to travel over this same wire…</p>
+    <p class="bad up" data-at="6">…and Mallory copied it. To share a secret safely, you first need a secret. Chicken and egg.</p>
+  </div>
+</section>
+
+<!-- ============ ASYMMETRIC ============ -->
+<section class="slide" id="s-asym">
+  <aside class="notes">Padlock analogy. The bank gives out open padlocks to anyone. Anyone can snap one shut. Only the bank's private key opens it. Giving away padlocks is safe.</aside>
+  <div class="eyebrow"><span class="n">1</span> Talking in public</div>
+  <h2>Idea 2: a key pair. Give away padlocks, keep the key.</h2>
+  <div class="scene">
+    <svg class="over"><line class="wire" x1="170" y1="108" x2="1220" y2="108"/><line class="wire dash" x1="690" y1="108" x2="690" y2="300"/></svg>
+    <div class="actor you" style="left:0;top:60px"><svg class="ico"><use href="#i-laptop"/></svg><span class="nm">You</span></div>
+    <div class="actor bank" style="left:1220px;top:60px"><svg class="ico"><use href="#i-server"/></svg><span class="nm">bank.com</span></div>
+    <div class="actor mal" style="left:610px;top:300px"><svg class="ico"><use href="#i-hacker"/></svg><span class="nm">Mallory</span></div>
+    <div class="tok c-priv pop" data-at="1" style="position:absolute;left:1236px;top:300px"><svg class="ico"><use href="#i-key"/></svg>private key<br><span class="c-mute">never leaves</span></div>
+    <div class="tok c-pub pop" data-at="1" style="position:absolute;left:1070px;top:300px"><svg class="ico"><use href="#i-lock-open"/></svg>public key<br><span class="c-mute">open padlock</span></div>
+    <div class="tok c-pub" data-at="2" data-out="3" data-pos="1:1070,300;2:200,250"><svg class="ico"><use href="#i-lock-open"/></svg>your copy</div>
+    <div class="tok c-pub" data-at="2" data-pos="1:1070,300;2:470,320"><svg class="ico"><use href="#i-lock-open"/></svg>Mallory's copy</div>
+    <div class="tok c-pub" data-at="3" data-out="5" data-pos="3:200,230;4:1010,-40"><span style="position:relative;display:inline-block"><svg class="ico" style="font-size:66px;color:var(--paper)"><use href="#i-box"/></svg><svg class="ico" style="position:absolute;right:-14px;bottom:-6px;font-size:36px"><use href="#i-lock"/></svg></span>locked box</div>
+    <div class="speech bad pop" data-at="4" data-out="5" style="left:790px;top:330px">My padlock can close boxes. It cannot open them.</div>
+    <div class="chip ok pop" data-at="5" style="position:absolute;left:1050px;top:-30px">HELLO</div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">The bank makes two linked keys: a <span class="c-priv">private key</span> it keeps, and a <span class="c-pub">public key</span> that works like an open padlock.</p>
+    <p class="up" data-at="2" data-out="3">It hands copies of the padlock to anyone who asks. Even Mallory. That is fine.</p>
+    <p class="up" data-at="3" data-out="4">You put your message in a box and snap the bank's padlock shut.</p>
+    <p class="up" data-at="4" data-out="5">The box crosses the wire. Mallory's padlock copy cannot open it.</p>
+    <p class="ok up" data-at="5">Only the private key opens it. Public key locks; private key unlocks.</p>
+  </div>
+</section>
+
+<!-- ============ SIGNATURE ============ -->
+<section class="slide" id="s-sign">
+  <aside class="notes">The same key pair, used the other way. The private key makes a stamp. Anyone with the public key can check the stamp. Key point to remember for later: whoever holds the private key can sign as you.</aside>
+  <div class="eyebrow"><span class="n">1</span> Talking in public</div>
+  <h2>The same key pair can also sign</h2>
+  <div class="scene">
+    <div class="doc">
+      <div class="label">Message</div>
+      <div class="dmsg">"Send ₹5,000 to account <span class="swap"><span data-out="3">1234</span><span class="abs c-bad" data-at="3" style="color:#d4223f">9999</span></span>."</div>
+      <div class="from">— from www.bank.com</div>
+      <div class="stamp pop" data-at="1" data-out="3"><svg class="ico"><use href="#i-seal"/></svg></div>
+    </div>
+    <div class="res up" data-at="1" data-out="2" style="top:20px"><svg class="ico c-priv" style="font-size:60px;flex:none"><use href="#i-key"/></svg><span>The bank stamps the message with its <b class="c-priv">private key</b>. Only the private key can make this exact stamp.</span></div>
+    <div class="res up" data-at="2" data-out="3" style="top:20px"><span class="badge ok">✓</span><span>You check the stamp with the bank's <b class="c-pub">public key</b>. It matches: the bank wrote this, and nobody changed it.</span></div>
+    <div class="res up" data-at="3" data-out="4" style="top:20px"><span class="badge bad">✗</span><span>Mallory changes one number. The old stamp no longer matches the new text, so the check fails.</span></div>
+    <div class="res up" data-at="4" style="top:20px"><span class="badge bad">✗</span><span>Mallory cannot make a new stamp, because she does not have the bank's private key.</span></div>
+    <div class="res up" data-at="5" style="top:220px"><svg class="ico c-priv" style="font-size:60px;flex:none"><use href="#i-key"/></svg><span><b class="c-priv">Remember this.</b> If Mallory ever gets the private key, she can sign anything, and every check will say ✓.</span></div>
+  </div>
+  <div class="cap"><p class="up" data-at="5">A signature proves who wrote something. The proof is only as safe as the private key.</p></div>
+</section>
+
+<!-- ============ TOY RING ============ -->
+<section class="slide" id="s-ring" data-steps="5">
+  <aside class="notes">A toy model of elliptic-curve keys. The private key is a count of jumps. The public key is where you land. Jumping forward is easy. Working backward from the landing spot means trying every count. Real curves have about 10^115 spots, so trying all is impossible. Unless the count is tiny.</aside>
+  <div class="eyebrow"><span class="n">1</span> Talking in public</div>
+  <h2>Why is a key pair "easy one way, hard the other way"?</h2>
+  <div class="scene">
+    <svg id="ring-svg" viewBox="0 0 600 600"></svg>
+    <div class="ctr"><div class="label">count</div><div class="big" id="ring-k">0</div></div>
+    <div class="txt">
+      <div class="up" data-at="0" data-out="1"><h3>A toy clock with 30 spots</h3><p class="c-mute">Real keys use points on an elliptic curve. This toy works the same way, just much smaller.</p></div>
+      <div class="up" data-at="1" data-out="2"><h3>The rule</h3><p>Count 1 is the white spot <b>3</b>. Each jump: multiply by 3, then wrap around 31.<br><span class="c-mute">3 → 9 → 27 → 19 → 26 → …</span></p><p class="c-mute" style="margin-top:12px">Everyone knows the start spot and the rule. They are public.</p></div>
+      <div class="up" data-at="2" data-out="3"><h3>Private key = the count</h3><p>I secretly pick a count of <b class="c-priv">7</b>.<br>After 7 counts I land on spot <b class="c-pub">17</b>.</p><p style="margin-top:12px"><span class="c-priv">Private key: 7</span><br><span class="c-pub">Public key: 17</span></p></div>
+      <div class="up" data-at="3" data-out="4"><h3>Forward is easy</h3><p>Knowing 7, finding 17 is quick. Computers have shortcuts (double, double, add), so even a 116-digit count takes well under a millisecond.</p></div>
+      <div class="up" data-at="4" data-out="5"><h3>Backward is hard</h3><p>Someone sees only <b class="c-pub">17</b>. What was the count? The spots look random, so the only way is to try:</p>
+        <div class="trials"><span>1 → 3</span><span>5 → 26</span><span>2 → 9</span><span>6 → 16</span><span>3 → 27</span><span class="c-ok">7 → 17 ✓</span><span>4 → 19</span></div></div>
+      <div class="up" data-at="5"><h3>That is the whole trick</h3><p>With 30 spots, trying them all takes a second.</p><p style="margin-top:14px">A real P-384 curve has about <b class="c-priv mono" style="word-break:break-all;font-size:19px;line-height:1.5;display:block;margin-top:6px">39,402,006,196,394,479,212,279,040,100,143,613,805,079,739,270,465,446,667,946,905,279,627,659,399,113,263,569,398,956,308,152,294,913,554,433,653,942,643</b> spots.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW BIG ============ -->
+<section class="slide" id="s-big">
+  <aside class="notes">Log scale: each bar length counts digits, not size. The P-384 key space is 10^115. Even a universe of computers could not search it. Then show eMudhra's bar: it is almost invisible.</aside>
+  <div class="eyebrow"><span class="n">1</span> Talking in public</div>
+  <h2>How big is "impossible to guess"?</h2>
+  <div class="scene">
+    <div class="axis">Log scale · bar length = number of digits</div>
+    <div class="rows">
+      <div class="r up" data-at="1"><span class="nm">Seconds since the Big Bang</span><div class="track"><div class="bar" data-at="1" style="width:149px"></div><span class="val" style="left:165px">4 × 10<sup>17</sup></span></div></div>
+      <div class="r up" data-at="1" style="transition-delay:.15s"><span class="nm">Grains of sand on Earth</span><div class="track"><div class="bar" data-at="1" style="width:161px;transition-delay:.15s"></div><span class="val" style="left:177px">≈ 10<sup>19</sup></span></div></div>
+      <div class="r up" data-at="1" style="transition-delay:.3s"><span class="nm">Atoms in your body</span><div class="track"><div class="bar" data-at="1" style="width:236px;transition-delay:.3s"></div><span class="val" style="left:252px">7 × 10<sup>27</sup></span></div></div>
+      <div class="r up" data-at="2"><span class="nm">Atoms in the observable universe</span><div class="track"><div class="bar" data-at="2" style="width:678px"></div><span class="val" style="left:694px">≈ 10<sup>80</sup></span></div></div>
+      <div class="r k up" data-at="3"><span class="nm"><b>Possible P-384 private keys</b></span><div class="track"><div class="bar" data-at="3" style="width:980px"></div><span class="val" style="left:830px;top:-26px">3.9 × 10<sup>115</sup></span></div></div>
+      <div class="r e up" data-at="5"><span class="nm">eMudhra's 8 keys</span><div class="track"><div class="bar" data-at="5" style="width:20px"></div><span class="val" style="left:36px">fewer than 256 (2.4 digits)</span></div></div>
+    </div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="4" data-out="5">If every atom in the universe were a computer guessing a billion keys a second since the Big Bang, together they would still not finish.</p>
+    <p class="bad up" data-at="5">Unless the key is a small number. Then a laptop finishes before you blink.</p>
+  </div>
+</section>
+<style>
+.map{position:absolute;left:0;right:0;top:0;display:grid;grid-template-columns:1fr 70px 1fr;gap:0;row-gap:12px;align-items:center}
+.map .hd{font:500 15px/1 var(--f-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--mute);padding-bottom:8px}
+.map .l,.map .r{padding:14px 20px;border-radius:10px;background:var(--ink2);border:1px solid var(--line);font-size:22px;line-height:1.3}
+.map .r{border-color:rgba(183,156,255,.45)}
+.map .a{text-align:center;color:var(--dim);font-size:30px}
+.map .row3{display:contents}
+
+#s-anat .cert{left:0;top:0;width:640px}
+#s-anat .row{transition:background-color .4s}
+#s-anat .row[data-s="cur"]{background:var(--ink3);box-shadow:inset 3px 0 0 var(--priv)}
+#s-anat .ex{position:absolute;left:720px;right:0;top:10px}
+#s-anat .ex > div{position:absolute;left:0;right:0;top:0;font-size:26px;line-height:1.45}
+#s-anat .ex h3{font-size:34px;margin-bottom:12px}
+#s-anat .seal{position:absolute;right:20px;bottom:16px;font-size:74px;color:var(--ca)}
+
+#s-get .flowpanel{position:absolute;left:300px;width:780px;top:220px;padding:20px 26px;font-size:22px;line-height:1.45}
+#s-get .flowpanel .mono{font-size:18px;color:var(--pub);word-break:break-all}
+#s-get .types{position:absolute;left:300px;top:300px;display:flex;gap:16px}
+#s-get .types .chip{font-size:17px}
+
+.jobs{position:absolute;left:0;right:0;top:0;display:grid;grid-template-columns:repeat(5,1fr);gap:20px}
+.job{border:1px solid var(--line);background:var(--ink2);border-radius:12px;padding:24px 22px;min-height:300px}
+.job .k{font:700 44px/1 var(--f-display);color:var(--line2)}
+.job h3{font-size:27px;margin-top:16px}
+.job p{font-size:19px;color:var(--mute);line-height:1.45;margin-top:10px}
+.job[data-s="hot"]{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad),0 0 60px -12px rgba(255,79,106,.5)}
+.job[data-s="hot"] .k,.job[data-s="hot"] h3{color:var(--bad)}
+
+#s-many .cas{position:absolute;left:0;top:0;width:600px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+#s-many .cas span{font:500 16px/1.25 var(--f-mono);padding:14px 12px;border-radius:8px;background:var(--ink2);border:1px solid rgba(183,156,255,.35);color:var(--ca);text-align:center}
+#s-many .cas span.em{border-color:var(--priv);color:var(--priv)}
+#s-many .why{position:absolute;left:680px;right:0;top:0;display:flex;flex-direction:column;gap:18px}
+#s-many .why div{font-size:23px;line-height:1.4;padding-left:20px;border-left:2px solid var(--line2)}
+#s-many .why b{color:var(--paper)}
+
+#s-weak .node{position:absolute;transform:translateX(-50%);text-align:center;font:500 16px/1.2 var(--f-mono);white-space:nowrap}
+#s-weak .node .ico{font-size:52px;display:block;margin:0 auto 6px}
+#s-weak .ca-n{color:var(--ca)} #s-weak .site-n{color:var(--ok)}
+#s-weak .ca-n[data-s="bad"]{color:var(--bad)}
+#s-weak line.lk{stroke:rgba(183,156,255,.35);stroke-width:1.5}
+#s-weak line.lk[data-s="bad"]{stroke:var(--bad);stroke-width:3}
+
+#s-roots .rp{position:absolute;left:0;top:0;width:780px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+#s-roots .rp > div{padding:20px 22px;border-radius:12px;background:var(--ink2);border:1px solid var(--line)}
+#s-roots .rp h3{font-size:26px}
+#s-roots .rp p{font-size:18px;color:var(--mute);line-height:1.4;margin-top:8px}
+#s-roots .shelf{position:absolute;left:840px;right:0;top:0;height:420px;overflow:hidden}
+#s-roots .shelf .bar{position:relative;z-index:2;background:var(--ink2);display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);font:500 14px var(--f-mono);color:var(--mute);letter-spacing:.08em;text-transform:uppercase}
+#s-roots .shelf .list{padding:6px 0;animation:rootscroll 18s linear infinite}
+#s-roots .shelf .list div{font:500 17px/1 var(--f-mono);padding:10px 18px;color:var(--paper);display:flex;gap:10px;align-items:center}
+#s-roots .shelf .list div .ico{font-size:18px;color:var(--ca)}
+#s-roots .shelf .list div.em{color:var(--priv);background:var(--priv-a)}
+@keyframes rootscroll{0%{transform:translateY(0)}100%{transform:translateY(-50%)}}
+
+.chain .lv{position:absolute;left:300px;width:470px;height:130px;border-radius:14px;border:1px solid var(--line2);background:var(--ink2);display:grid;grid-template-columns:96px 1fr;align-items:center;padding:0 22px;box-sizing:border-box;gap:14px}
+.chain .lv .ico{font-size:70px}
+.chain .lv h3{font-size:27px}
+.chain .lv p{font:500 15px/1.4 var(--f-mono);color:var(--mute);margin-top:6px}
+.chain .lv[data-s="hot"]{border-color:var(--bad);box-shadow:0 0 0 1px var(--bad),0 0 60px -10px rgba(255,79,106,.6)}
+.chain .lv[data-s="hot"] h3{color:var(--bad)}
+.chain .arr{position:absolute;left:520px;font:500 15px/1 var(--f-mono);color:var(--ca);letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.chain .arr .ico{font-size:30px;transform:rotate(90deg)}
+.chain .notes2{position:absolute;left:860px;right:0;top:0;display:flex;flex-direction:column;gap:22px}
+.chain .notes2 > div{font-size:22px;line-height:1.45;padding:18px 20px;border-radius:12px;background:var(--ink2);border:1px solid var(--line)}
+.chain .notes2 > div.bad{border-color:var(--bad);background:var(--bad-a)}
+#s-verify .hl{width:494px;height:154px;border:3px solid var(--ok);border-radius:18px;box-shadow:0 0 40px -6px rgba(62,220,142,.6)}
+#s-verify .ck{display:flex;gap:14px;align-items:flex-start;font-size:21px;line-height:1.4}
+#s-verify .ck .badge{width:34px;height:34px;font-size:20px;flex:none;margin-top:1px}
+#s-verify .padlock{position:absolute;left:0;top:190px;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ok);font:600 18px var(--f-body)}
+#s-verify .padlock .ico{font-size:110px}
+</style>
+
+<!-- ============ CH 2 ============ -->
+<section class="slide chapter" id="s-ch2" data-steps="0">
+  <canvas class="guilloche" data-color="183,156,255" data-seed="2"></canvas>
+  <div class="num">2</div>
+  <h2>Who are you, really?</h2>
+  <p class="lead">Encryption hides the message. It does not tell you who is on the other end.</p>
+</section>
+
+<!-- ============ MITM ============ -->
+<section class="slide" id="s-mitm">
+  <aside class="notes">Man in the middle. Mallory swaps padlocks. You lock your message with her padlock, thinking it is the bank's. She reads it, re-locks it with the real bank padlock, and passes it on. Nobody notices.</aside>
+  <div class="eyebrow"><span class="n">2</span> Who are you?</div>
+  <h2>The problem: whose padlock is this?</h2>
+  <div class="scene">
+    <svg class="over"><line class="wire" x1="170" y1="108" x2="610" y2="108"/><line class="wire" x1="770" y1="108" x2="1220" y2="108"/></svg>
+    <div class="actor you" style="left:0;top:60px"><svg class="ico"><use href="#i-laptop"/></svg><span class="nm">You</span></div>
+    <div class="actor mal" style="left:610px;top:60px"><svg class="ico"><use href="#i-hacker"/></svg><span class="nm">Mallory</span><span class="sub">in the middle</span></div>
+    <div class="actor bank" style="left:1220px;top:60px"><svg class="ico"><use href="#i-server"/></svg><span class="nm">bank.com</span></div>
+    <div class="speech pop" data-at="1" data-out="2" style="left:120px;top:-50px">Bank, please send me your padlock.</div>
+    <div class="tok c-pub" data-at="2" data-pos="1:1250,250;2:800,250"><svg class="ico"><use href="#i-lock-open"/></svg>bank's padlock</div>
+    <div class="tok c-bad" data-at="2" data-out="3" data-pos="1:560,250;2:190,250"><svg class="ico"><use href="#i-lock-open"/></svg>"bank's" padlock<br>(really Mallory's)</div>
+    <div class="tok c-bad" data-at="3" data-out="5" data-pos="3:190,230;4:450,230"><span style="position:relative;display:inline-block"><svg class="ico" style="font-size:66px;color:var(--paper)"><use href="#i-box"/></svg><svg class="ico" style="position:absolute;right:-14px;bottom:-6px;font-size:36px"><use href="#i-lock"/></svg></span>locked with Mallory's</div>
+    <div class="speech bad pop" data-at="4" data-out="6" style="left:500px;top:-60px">I can open it! <span class="mono">PIN = 4821</span></div>
+    <div class="tok c-pub" data-at="5" data-pos="5:800,230;6:1060,230"><span style="position:relative;display:inline-block"><svg class="ico" style="font-size:66px;color:var(--paper)"><use href="#i-box"/></svg><svg class="ico" style="position:absolute;right:-14px;bottom:-6px;font-size:36px"><use href="#i-lock"/></svg></span>re-locked with bank's</div>
+    <div class="speech ok pop" data-at="6" style="left:1080px;top:-60px">Message received. All normal.</div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">You ask the bank for its public key (its padlock).</p>
+    <p class="up" data-at="2" data-out="3">Mallory keeps the bank's padlock and sends you her own instead. They look the same.</p>
+    <p class="up" data-at="3" data-out="4">You lock your message with Mallory's padlock, believing it is the bank's.</p>
+    <p class="bad up" data-at="4" data-out="5">Mallory opens it with her own private key and reads everything.</p>
+    <p class="up" data-at="5" data-out="6">She re-locks it with the real bank padlock and passes it on.</p>
+    <p class="bad up" data-at="6">Nobody notices. Encryption to the wrong person is worthless. We need proof that a public key really belongs to the bank.</p>
+  </div>
+</section>
+
+<!-- ============ PASSPORT ============ -->
+<section class="slide" id="s-pass">
+  <aside class="notes">We solved this in the physical world long ago. A border officer has never met you, but trusts the government that issued your passport. The web copies this exactly.</aside>
+  <div class="eyebrow"><span class="n">2</span> Who are you?</div>
+  <h2>The real world solved this with passports</h2>
+  <div class="scene">
+    <div class="map">
+      <div class="hd">At the border</div><div></div><div class="hd c-ca">On the web</div>
+      <div class="l left" data-at="1">Passport office (the government)</div><div class="a" data-at="1">→</div><div class="r right" data-at="1"><b class="c-ca">Certificate Authority (CA)</b></div>
+      <div class="l left" data-at="2">Your passport</div><div class="a" data-at="2">→</div><div class="r right" data-at="2"><b>Certificate</b></div>
+      <div class="l left" data-at="3">Your name and photo inside it</div><div class="a" data-at="3">→</div><div class="r right" data-at="3">Website name + its <span class="c-pub">public key</span></div>
+      <div class="l left" data-at="4">Hologram and official seal, hard to fake</div><div class="a" data-at="4">→</div><div class="r right" data-at="4">The CA's <span class="c-ca">digital signature</span>, made with the CA's <span class="c-priv">private key</span></div>
+      <div class="l left" data-at="5">Officer who trusts the passport office</div><div class="a" data-at="5">→</div><div class="r right" data-at="5">Your browser, which trusts a built-in list of CAs</div>
+    </div>
+  </div>
+  <div class="cap"><p class="ca up" data-at="6">The officer never met you, but trusts whoever made your passport. Your browser never met bank.com, but trusts whoever signed its certificate.</p></div>
+</section>
+
+<!-- ============ CERT ANATOMY ============ -->
+<section class="slide" id="s-anat">
+  <aside class="notes">Walk through each field. The key link: the certificate glues a name (www.bank.com) to a public key, and the CA's signature makes the glue unbreakable. This is how a certificate is linked to one website.</aside>
+  <div class="eyebrow"><span class="n">2</span> Who are you?</div>
+  <h2>What is inside a certificate?</h2>
+  <div class="scene">
+    <div class="cert">
+      <div class="ch"><span>X.509 certificate</span><svg class="ico"><use href="#i-doc"/></svg></div>
+      <div class="row up" data-at="1" data-st="1:cur;2:"><span>Name</span><span>www.bank.com<br>bank.com</span></div>
+      <div class="row up" data-at="2" data-st="2:cur;3:"><span>Public key</span><span class="c-pub">EC P-256<br>04 6b17d1f2 e12c4247 f8bce6e5 63a440f2 …</span></div>
+      <div class="row up" data-at="3" data-st="3:cur;4:"><span>Valid</span><span>2026-09-01 → 2026-11-29</span></div>
+      <div class="row up" data-at="4" data-st="4:cur;5:"><span>Issuer</span><span class="c-ca">Example Issuing CA R3</span></div>
+      <div class="row up" data-at="5" data-st="5:cur;6:" style="position:relative;padding-right:110px"><span>Signature</span><span class="c-ca">ECDSA-SHA384<br>30 65 02 31 00 c4 9a 71 …</span><svg class="ico seal pop" data-at="5" style="position:absolute;right:16px;top:8px;font-size:60px;color:var(--ca)"><use href="#i-seal"/></svg></div>
+    </div>
+    <div class="ex">
+      <div class="up" data-at="0" data-out="1"><h3>A small file, about 1–2 KB</h3><p class="c-mute">Every HTTPS website sends one to your browser. Let's open it.</p></div>
+      <div class="up" data-at="1" data-out="2"><h3>Name: who is this for?</h3><p>The website names the certificate covers. Your browser compares this with the address bar. <b>bank.com</b> ≠ <b>bank-secure-login.com</b>.</p></div>
+      <div class="up" data-at="2" data-out="3"><h3 class="c-pub">Public key: the padlock</h3><p>The website's public key. The matching <span class="c-priv">private key</span> never leaves the bank's server. The server must prove it holds it.</p></div>
+      <div class="up" data-at="3" data-out="4"><h3>Valid from / to</h3><p>Certificates expire, often after a few months. A short life limits the damage if something goes wrong.</p></div>
+      <div class="up" data-at="4" data-out="5"><h3 class="c-ca">Issuer: who vouches?</h3><p>The certificate authority that checked the website and signed this certificate.</p></div>
+      <div class="up" data-at="5" data-out="6"><h3 class="c-ca">Signature: the seal</h3><p>The issuer signs all the fields above with <b class="c-priv">its own private key</b>. Change one letter of the name or key, and the signature no longer matches.</p></div>
+      <div class="up" data-at="6"><h3>So how is a certificate tied to one website?</h3><p>The CA's signature glues <b>this name</b> to <b class="c-pub">this public key</b>. Only the real website has the matching private key, so only it can use the certificate.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ GET A CERT ============ -->
+<section class="slide" id="s-get">
+  <aside class="notes">How a website gets a certificate. Make keys. Send a request. The CA asks you to prove you control the domain. Then the CA signs. With ACME (Let's Encrypt and others) this is automatic and takes seconds.</aside>
+  <div class="eyebrow"><span class="n">2</span> Who are you?</div>
+  <h2>How does a website get a certificate?</h2>
+  <div class="scene">
+    <svg class="over"><line class="wire" x1="170" y1="128" x2="1220" y2="128"/></svg>
+    <div class="actor bank" style="left:0;top:80px"><svg class="ico"><use href="#i-server"/></svg><span class="nm">bank.com</span><span class="sub">web server</span></div>
+    <div class="actor ca" style="left:1220px;top:80px"><svg class="ico"><use href="#i-ca"/></svg><span class="nm">Certificate Authority</span></div>
+    <div class="tok c-priv pop" data-at="1" style="position:absolute;left:-10px;top:300px"><svg class="ico"><use href="#i-key"/></svg>private key<br><span class="c-mute">stays here</span></div>
+    <div class="tok c-pub pop" data-at="1" style="position:absolute;left:110px;top:300px"><svg class="ico"><use href="#i-lock-open"/></svg>public key</div>
+    <div class="chip pub" data-at="2" data-out="7" data-pos="2:200,40;3:930,40"><svg class="ico"><use href="#i-doc"/></svg>CSR: "www.bank.com" + public key</div>
+    <div class="panel flowpanel up" data-at="4" data-out="7"><b class="c-ca">CA:</b> Prove you control bank.com. Put this text on your site:<br><span class="mono">http://bank.com/.well-known/acme-challenge/Qx7kT2… → "Qx7kT2….9fJm"</span><br><span class="c-mute">(or add a DNS TXT record)</span></div>
+    <div class="chip ok pop" data-at="5" data-out="7" style="position:absolute;left:1000px;top:-30px"><svg class="ico"><use href="#i-check"/></svg>control proven</div>
+    <div class="chip ca" data-at="6" data-pos="6:1000,40;7:200,40"><svg class="ico"><use href="#i-seal"/></svg>Certificate, signed by the CA</div>
+    <div class="types up" data-at="7">
+      <span class="chip ok">DV · checks domain control only</span><span class="chip pub">OV · also checks the organisation</span><span class="chip ca">EV · deeper legal checks</span>
+    </div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">1. The server makes its own key pair. The private key never leaves the server.</p>
+    <p class="up" data-at="2" data-out="3">2. It writes a request (a CSR): "Please certify that this public key belongs to www.bank.com."</p>
+    <p class="up" data-at="3" data-out="4">3. The request goes to a certificate authority.</p>
+    <p class="up" data-at="4" data-out="5">4. The CA sets a test that only the real owner of bank.com can pass.</p>
+    <p class="ok up" data-at="5" data-out="6">5. The server passes the test. The CA's machines check it from outside.</p>
+    <p class="ca up" data-at="6" data-out="7">6. The CA signs the certificate with the CA's private key and sends it back.</p>
+    <p class="up" data-at="7">7. The server installs it and shows it to every visitor. With ACME automation, all of this takes seconds.</p>
+  </div>
+</section>
+
+<!-- ============ CA JOB ============ -->
+<section class="slide" id="s-job">
+  <aside class="notes">What a CA does, and how it earns money: it sells this checking-and-signing as a service. eMudhra sells under the brand emSign. Job 3 is the one that failed.</aside>
+  <div class="eyebrow"><span class="n">2</span> Who are you?</div>
+  <h2>The job of a certificate authority, in five verbs</h2>
+  <div class="scene">
+    <div class="jobs">
+      <div class="job up" data-at="1"><div class="k">1</div><h3>Check</h3><p>Confirm the requester really controls the domain (and, for OV/EV, really is that company).</p></div>
+      <div class="job up" data-at="2"><div class="k">2</div><h3>Sign</h3><p>Seal the certificate with the CA's private key, so browsers will accept it.</p></div>
+      <div class="job up" data-at="3" data-st="6:hot"><div class="k">3</div><h3>Guard the key</h3><p>Create signing keys correctly and keep them locked in special hardware. Everything depends on this.</p></div>
+      <div class="job up" data-at="4"><div class="k">4</div><h3>Cancel</h3><p>Revoke bad certificates and publish lists of cancelled ones.</p></div>
+      <div class="job up" data-at="5"><div class="k">5</div><h3>Publish</h3><p>Log every certificate in public, and pass yearly audits to stay trusted.</p></div>
+    </div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="5" data-out="6">CAs sell this as a business. Website owners pay (or use a free CA like Let's Encrypt). Browsers decide which CAs to trust.</p>
+    <p class="bad up" data-at="6">eMudhra failed at job 3: the keys were not created correctly.</p>
+  </div>
+</section>
+
+<!-- ============ WHY MANY ============ -->
+<section class="slide" id="s-many">
+  <aside class="notes">There are dozens of trusted CA organisations worldwide. Reasons: competition, local law and language, different products, and no single company owning web identity.</aside>
+  <div class="eyebrow"><span class="n">2</span> Who are you?</div>
+  <h2>Why are there so many certificate authorities?</h2>
+  <div class="scene">
+    <div class="cas">
+      <span class="pop" data-at="1">Let's Encrypt</span><span class="pop" data-at="1" style="transition-delay:.05s">DigiCert</span><span class="pop" data-at="1" style="transition-delay:.1s">Sectigo</span>
+      <span class="pop" data-at="1" style="transition-delay:.15s">GlobalSign</span><span class="pop" data-at="1" style="transition-delay:.2s">Google Trust Services</span><span class="pop" data-at="1" style="transition-delay:.25s">Amazon</span>
+      <span class="pop" data-at="1" style="transition-delay:.3s">Microsoft</span><span class="pop" data-at="1" style="transition-delay:.35s">Certum</span><span class="pop" data-at="1" style="transition-delay:.4s">HARICA</span>
+      <span class="pop" data-at="1" style="transition-delay:.45s">SSL.com</span><span class="pop" data-at="1" style="transition-delay:.5s">Actalis</span><span class="pop em" data-at="1" style="transition-delay:.55s">eMudhra (emSign)</span>
+      <span class="pop" data-at="1" style="transition-delay:.6s">IdenTrust</span><span class="pop" data-at="1" style="transition-delay:.65s">Buypass</span><span class="pop" data-at="1" style="transition-delay:.7s">… and dozens more</span>
+    </div>
+    <div class="why">
+      <div class="up" data-at="2"><b>Competition.</b> Price, service, and support differ. No company is forced to use one seller.</div>
+      <div class="up" data-at="3"><b>Local needs.</b> Some countries, governments and banks want a CA under their own laws and in their own language.</div>
+      <div class="up" data-at="4"><b>Different products.</b> Website certificates, software signing, email, document signing.</div>
+      <div class="up" data-at="5"><b>No single owner.</b> If one CA fails or goes out of business, the web keeps working.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WEAKEST LINK ============ -->
+<section class="slide" id="s-weak" data-steps="3">
+  <aside class="notes">The catch. Any CA in the trusted list can sign a certificate for any website. So the safety of google.com depends on the worst-run CA in the list, not the one Google chose.</aside>
+  <div class="eyebrow"><span class="n">2</span> Who are you?</div>
+  <h2>Any trusted CA can vouch for any website</h2>
+  <div class="scene" id="weak-scene"></div>
+  <div class="cap">
+    <p class="ca up" data-at="1" data-out="2">Google buys its certificate from one CA. But that is not a rule the browser checks…</p>
+    <p class="up" data-at="2" data-out="3">…every trusted CA is technically able to sign a certificate for every website name.</p>
+    <p class="bad up" data-at="3">So the whole web is only as strong as the weakest CA on the list. One broken CA key is a master key.</p>
+  </div>
+</section>
+
+<!-- ============ ROOT PROGRAMS ============ -->
+<section class="slide" id="s-roots">
+  <aside class="notes">Four big root programs decide which CAs are trusted: Mozilla, Google Chrome, Apple, Microsoft. Mozilla's list is also copied into Linux and countless apps. CAs must follow shared rules and pass audits.</aside>
+  <div class="eyebrow"><span class="n">2</span> Who are you?</div>
+  <h2>Who decides which CAs your device trusts?</h2>
+  <div class="scene">
+    <div class="rp">
+      <div class="up" data-at="1"><h3>Mozilla</h3><p>Firefox. Its list is also copied by Linux and many apps and libraries.</p></div>
+      <div class="up" data-at="2"><h3>Google Chrome</h3><p>Chrome Root Store, used by Chrome on all platforms and by Android.</p></div>
+      <div class="up" data-at="3"><h3>Apple</h3><p>iPhone, iPad, Mac, Safari.</p></div>
+      <div class="up" data-at="4"><h3>Microsoft</h3><p>Windows, Edge and Windows apps.</p></div>
+    </div>
+    <div class="panel shelf up" data-at="5">
+      <div class="bar"><svg class="ico" style="font-size:22px"><use href="#i-browser"/></svg>Built-in trusted roots</div>
+      <div class="list" aria-hidden="true">
+        <div><svg class="ico"><use href="#i-seal"/></svg>ISRG Root X1</div><div><svg class="ico"><use href="#i-seal"/></svg>DigiCert Global Root G2</div><div><svg class="ico"><use href="#i-seal"/></svg>GTS Root R1</div><div><svg class="ico"><use href="#i-seal"/></svg>USERTrust RSA Certification Authority</div><div class="em"><svg class="ico"><use href="#i-seal"/></svg>emSign ECC Root CA - G3</div><div><svg class="ico"><use href="#i-seal"/></svg>Amazon Root CA 1</div><div><svg class="ico"><use href="#i-seal"/></svg>Certum Trusted Network CA</div><div><svg class="ico"><use href="#i-seal"/></svg>HARICA TLS RSA Root CA 2021</div><div><svg class="ico"><use href="#i-seal"/></svg>emSign Root CA - G1</div><div><svg class="ico"><use href="#i-seal"/></svg>SSL.com Root Certification Authority RSA</div><div><svg class="ico"><use href="#i-seal"/></svg>Actalis Authentication Root CA</div><div><svg class="ico"><use href="#i-seal"/></svg>Buypass Class 2 Root CA</div>
+        <div><svg class="ico"><use href="#i-seal"/></svg>ISRG Root X1</div><div><svg class="ico"><use href="#i-seal"/></svg>DigiCert Global Root G2</div><div><svg class="ico"><use href="#i-seal"/></svg>GTS Root R1</div><div><svg class="ico"><use href="#i-seal"/></svg>USERTrust RSA Certification Authority</div><div class="em"><svg class="ico"><use href="#i-seal"/></svg>emSign ECC Root CA - G3</div><div><svg class="ico"><use href="#i-seal"/></svg>Amazon Root CA 1</div><div><svg class="ico"><use href="#i-seal"/></svg>Certum Trusted Network CA</div><div><svg class="ico"><use href="#i-seal"/></svg>HARICA TLS RSA Root CA 2021</div><div><svg class="ico"><use href="#i-seal"/></svg>emSign Root CA - G1</div><div><svg class="ico"><use href="#i-seal"/></svg>SSL.com Root Certification Authority RSA</div><div><svg class="ico"><use href="#i-seal"/></svg>Actalis Authentication Root CA</div><div><svg class="ico"><use href="#i-seal"/></svg>Buypass Class 2 Root CA</div>
+      </div>
+    </div>
+  </div>
+  <div class="cap"><p class="ca up" data-at="5">Each device ships a list of trusted "root" certificates. To stay on it, a CA must follow shared rules (the CA/Browser Forum Baseline Requirements) and pass audits every year. eMudhra's <span class="c-priv">emSign ECC Root CA - G3</span> was on these lists.</p></div>
+</section>
+
+<!-- ============ CHAIN ============ -->
+<section class="slide" id="s-chain">
+  <aside class="notes">Roots are too precious to use every day, so they sign intermediates, and intermediates sign websites. If an intermediate goes bad you cancel it and keep the root. eMudhra's weak keys were intermediates: one level below a trusted root.</aside>
+  <div class="eyebrow"><span class="n">2</span> Who are you?</div>
+  <h2>The chain of trust: root → intermediate → website</h2>
+  <div class="scene chain">
+    <div class="lv up" data-at="1" style="top:0"><svg class="ico c-ca"><use href="#i-vault"/></svg><div><h3>Root CA</h3><p>offline, in a vault · lives 20–25 years<br>in your browser's trusted list</p></div></div>
+    <div class="arr up" data-at="2" style="top:142px"><svg class="ico"><use href="#i-swap"/></svg>signs</div>
+    <div class="lv up" data-at="2" data-st="5:hot" style="top:192px"><svg class="ico c-ca"><use href="#i-ca"/></svg><div><h3>Intermediate CA</h3><p>online · signs certificates every day<br>lives a few years</p></div></div>
+    <div class="arr up" data-at="3" style="top:334px"><svg class="ico"><use href="#i-swap"/></svg>signs</div>
+    <div class="lv up" data-at="3" style="top:384px"><svg class="ico c-ok"><use href="#i-server"/></svg><div><h3>www.bank.com</h3><p>the "leaf" certificate<br>lives a few months</p></div></div>
+    <div class="notes2">
+      <div class="up" data-at="4"><b>Why the middle layer?</b> A root key is too precious to use daily. It stays offline. If an intermediate goes bad, cancel it; the root survives.</div>
+      <div class="bad up" data-at="5"><b class="c-bad">eMudhra's weak keys were intermediates.</b> Each one sat right under a trusted root, with full power to sign certificates for any website.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VERIFY ============ -->
+<section class="slide" id="s-verify">
+  <aside class="notes">The browser walks the chain upward, checking each signature with the public key one level up, until it reaches a root it already trusts. Important: the browser checks maths, not honesty.</aside>
+  <div class="eyebrow"><span class="n">2</span> Who are you?</div>
+  <h2>How the browser checks the chain</h2>
+  <div class="scene chain">
+    <div class="lv" style="top:0"><svg class="ico c-ca"><use href="#i-vault"/></svg><div><h3>Root CA</h3><p><span class="c-pub">public key R</span> · built into browser</p></div></div>
+    <div class="lv" style="top:192px"><svg class="ico c-ca"><use href="#i-ca"/></svg><div><h3>Intermediate CA</h3><p><span class="c-pub">public key I</span> · <span class="c-ca">signed by Root</span></p></div></div>
+    <div class="lv" style="top:384px"><svg class="ico c-ok"><use href="#i-server"/></svg><div><h3>www.bank.com</h3><p><span class="c-pub">public key B</span> · <span class="c-ca">signed by Intermediate</span></p></div></div>
+    <div class="hl" data-at="1" data-out="5" data-pos="1:288,372;2:288,180;3:288,-12"></div>
+    <div class="padlock pop" data-at="4"><svg class="ico"><use href="#i-lock"/></svg>secure</div>
+    <div class="notes2" style="gap:16px">
+      <div class="ck up" data-at="1"><span class="badge ok">✓</span><span>bank.com's certificate: its signature checks out with the intermediate's <span class="c-pub">public key I</span>.</span></div>
+      <div class="ck up" data-at="2"><span class="badge ok">✓</span><span>Intermediate's certificate: its signature checks out with the root's <span class="c-pub">public key R</span>.</span></div>
+      <div class="ck up" data-at="3"><span class="badge ok">✓</span><span>The root is in my built-in trusted list.</span></div>
+      <div class="ck up" data-at="4"><span class="badge ok">✓</span><span>Name matches the address bar, dates are valid, not cancelled. Show the padlock.</span></div>
+    </div>
+  </div>
+  <div class="cap"><p class="bad up" data-at="5">The browser checks maths, not honesty. Anyone holding the intermediate's private key can make these checks pass.</p></div>
+</section>
+<style>
+.lanes .lane-h{position:absolute;top:0;width:200px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;font:600 20px var(--f-body)}
+.lanes .lane-h .ico{font-size:58px}
+.lanes .lane{position:absolute;top:96px;bottom:0;width:0;border-left:2px dashed var(--line2)}
+.msg{position:absolute;height:34px}
+.msg .ln{position:absolute;left:0;right:0;bottom:0;height:3px;background:var(--mute);transform-origin:left center;transition:transform .8s var(--ease)}
+.msg.l .ln{transform-origin:right center}
+.msg .ln::after{content:"";position:absolute;top:-6px;border:7.5px solid transparent}
+.msg.r .ln::after{right:-2px;border-left:12px solid var(--mute);border-right:0}
+.msg.l .ln::after{left:-2px;border-right:12px solid var(--mute);border-left:0}
+.msg .t{position:absolute;left:0;right:0;bottom:10px;text-align:center;font:500 19px/1 var(--f-mono);white-space:nowrap}
+.msg[data-at]:not(.in) .ln{transform:scaleX(0)}
+.msg.hot .ln{background:var(--priv);height:4px} .msg.hot .ln::after{border-left-color:var(--priv);border-right-color:var(--priv)} .msg.hot .t{color:var(--priv);font-weight:600;font-size:22px}
+.msg.cav .ln{background:var(--ca)} .msg.cav.r .ln::after{border-left-color:var(--ca)} .msg.cav.l .ln::after{border-right-color:var(--ca)} .msg.cav .t{color:var(--ca)}
+.msg.okv .ln{background:var(--ok)} .msg.okv.r .ln::after{border-left-color:var(--ok)} .msg.okv.l .ln::after{border-right-color:var(--ok)} .msg.okv .t{color:var(--ok)}
+.msg.dimv .ln{background:var(--line2)} .msg.dimv.r .ln::after{border-left-color:var(--line2)} .msg.dimv.l .ln::after{border-right-color:var(--line2)} .msg.dimv .t{color:var(--mute)}
+.msg.pubv .ln{background:var(--pub)} .msg.pubv.r .ln::after{border-left-color:var(--pub)} .msg.pubv.l .ln::after{border-right-color:var(--pub)} .msg.pubv .t{color:var(--pub)}
+
+.pkt-card{position:absolute;left:0;top:-10px;width:700px;border:1px solid var(--line2);border-radius:14px;background:var(--ink2);overflow:hidden}
+.pkt-card .ph{padding:12px 20px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;font:500 14px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.pkt-card .f{display:grid;grid-template-columns:200px 1fr;gap:14px;padding:10px 20px;border-bottom:1px dashed var(--line);font:500 16px/1.4 var(--f-mono);transition:background-color .4s}
+.pkt-card .f:last-child{border-bottom:0}
+.pkt-card .f > span:first-child{color:var(--mute)}
+.pkt-card .f > span:last-child{min-width:0;word-break:break-word}
+.pkt-card .f[data-s="cur"]{background:var(--ink3);box-shadow:inset 3px 0 0 var(--priv)}
+.pkt-ex{position:absolute;left:760px;right:0;top:0}
+.pkt-ex > div{position:absolute;left:0;right:0;top:0;font-size:25px;line-height:1.45}
+.pkt-ex h3{font-size:32px;margin-bottom:12px}
+
+#s-eph .mach{position:absolute;display:flex;align-items:center;gap:26px;left:0;top:40px}
+#s-eph .box{border:2px solid var(--line2);border-radius:14px;padding:22px 26px;font:600 30px/1 var(--f-mono);background:var(--ink2)}
+#s-eph .arrow{font-size:44px;color:var(--dim)}
+#s-eph .dice{font-size:96px;color:var(--priv)}
+#s-eph .dice.in{animation:roll 1s var(--ease)}
+@keyframes roll{0%{transform:rotate(-200deg) scale(.4)}100%{transform:none}}
+#s-eph .val{font:500 22px/1.4 var(--f-mono)}
+#s-eph .note{position:absolute;left:0;right:0;top:260px;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+#s-eph .note > div{font-size:22px;line-height:1.45;padding:20px 22px;border-radius:12px;background:var(--ink2);border:1px solid var(--line)}
+
+.blob{position:absolute;width:84px;height:84px;border-radius:50%;box-shadow:inset -10px -12px 24px rgba(0,0,0,.25),inset 8px 8px 18px rgba(255,255,255,.18)}
+.blob span{position:absolute;top:92px;left:50%;transform:translateX(-50%);white-space:nowrap;font:500 15px/1.25 var(--f-mono);color:var(--paper);text-align:center}
+.blob.y{background:#F2CF3D} .blob.r{background:#E5484D} .blob.bl{background:#3E63DD} .blob.o{background:#EF8A35} .blob.g{background:#4FA86A} .blob.br{background:#7B4B2A}
+#s-paint .hd{position:absolute;top:-40px;font:600 20px var(--f-body);display:flex;gap:10px;align-items:center;transform:translateX(-50%);white-space:nowrap}
+#s-paint .hd .ico{font-size:32px}
+#s-paint .plus{position:absolute;font:600 30px var(--f-body);color:var(--mute)}
+
+#s-calc .side{position:absolute;top:0;width:520px;box-sizing:border-box;padding:24px 28px;border-radius:14px;background:var(--ink2);border:1px solid var(--line)}
+#s-calc .side h3{display:flex;gap:12px;align-items:center;font-size:26px}
+#s-calc .side h3 .ico{font-size:40px}
+#s-calc .side p{font:500 22px/1.6 var(--f-mono);margin-top:12px}
+#s-calc .eq{position:absolute;left:560px;width:260px;top:30px;text-align:center}
+#s-calc .eq .blob{position:relative;margin:0 auto;display:block}
+#s-calc .eq .t{font:600 18px/1.3 var(--f-mono);color:var(--paper);margin-top:12px}
+#s-calc .funnel{position:absolute;left:0;right:0;top:250px;display:flex;align-items:center;gap:22px}
+#s-calc .funnel .box{padding:16px 20px;border-radius:12px;border:1px solid var(--line2);background:var(--ink2);font:500 18px/1.4 var(--f-mono)}
+#s-calc .funnel .arrow{font-size:34px;color:var(--dim)}
+#s-calc .keys{display:flex;flex-direction:column;gap:10px}
+#s-calc .mal{position:absolute;left:300px;right:300px;top:440px}
+
+#s-aead .pipe{position:absolute;left:0;right:0;top:40px;height:200px}
+#s-aead .aes{position:absolute;top:0;width:230px;text-align:center;padding:0 12px;box-sizing:border-box;height:120px;border:2px solid var(--priv);border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font:600 22px var(--f-mono);color:var(--priv);background:var(--priv-a)}
+#s-aead .aes small{font:500 14px var(--f-mono);color:var(--mute)}
+#s-aead .ct{font:500 17px/1.3 var(--f-mono)}
+
+.stack{position:absolute;left:60px;bottom:0;width:560px;display:flex;flex-direction:column-reverse;gap:8px}
+.stack .blk{height:64px;border-radius:10px;border:1px solid var(--line2);background:var(--ink2);display:flex;align-items:center;gap:14px;padding:0 20px;font-size:22px;font-weight:500;transition:transform 1.2s cubic-bezier(.5,0,.75,0),opacity 1s,background-color .4s,border-color .4s}
+.stack .blk .ico{font-size:30px;flex:none}
+.stack .blk[data-s="hot"]{border-color:var(--priv);background:var(--priv-a);box-shadow:0 0 40px -10px rgba(255,181,71,.7)}
+.stack .blk[data-s="crack"]{border-color:var(--bad);background:var(--bad-a);color:var(--bad);animation:shake .5s 2}
+.stack .blk[data-s="fall"]{transform:translate(var(--fx,240px),620px) rotate(var(--fr,25deg));opacity:0}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+#s-stack .side{position:absolute;left:700px;right:0;top:20px;display:flex;flex-direction:column;gap:20px}
+#s-stack .side > div{font-size:24px;line-height:1.45}
+</style>
+
+<!-- ============ CH 3 ============ -->
+<section class="slide chapter" id="s-ch3" data-steps="0">
+  <canvas class="guilloche" data-color="255,181,71" data-seed="5"></canvas>
+  <div class="num">3</div>
+  <h2>The handshake</h2>
+  <p class="lead">What your browser and a website say to each other in the first 50 milliseconds of every HTTPS connection (TLS 1.3).</p>
+</section>
+
+<!-- ============ FIRST CALL ============ -->
+<section class="slide" id="s-first">
+  <aside class="notes">Before TLS starts: DNS finds the address, then TCP opens a pipe with three small packets. The very first TLS message is the ClientHello. Everything so far is readable by anyone on the path.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>The very first call: before any page loads</h2>
+  <div class="scene lanes">
+    <div class="lane-h c-pub" style="left:150px"><svg class="ico"><use href="#i-browser"/></svg><span style="color:var(--paper)">Browser</span></div>
+    <div class="lane-h c-ok" style="left:1230px"><svg class="ico"><use href="#i-server"/></svg><span style="color:var(--paper)">bank.com server</span></div>
+    <div class="lane" style="left:150px"></div><div class="lane" style="left:1230px"></div>
+    <div class="chip pop" data-at="1" style="position:absolute;left:470px;top:20px"><svg class="ico"><use href="#i-book"/></svg>DNS: bank.com → 203.0.113.10</div>
+    <div class="msg r dimv" data-at="2" style="left:150px;width:1080px;top:130px"><div class="t">TCP SYN · "can we talk?"</div><div class="ln"></div></div>
+    <div class="msg l dimv" data-at="3" style="left:150px;width:1080px;top:200px"><div class="t">TCP SYN-ACK · "yes"</div><div class="ln"></div></div>
+    <div class="msg r dimv" data-at="4" style="left:150px;width:1080px;top:270px"><div class="t">TCP ACK · "pipe open"</div><div class="ln"></div></div>
+    <div class="msg r hot" data-at="5" style="left:150px;width:1080px;top:360px"><div class="t">TLS ClientHello</div><div class="ln"></div></div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">First the browser asks DNS, the internet's phone book, for bank.com's address.</p>
+    <p class="up" data-at="2" data-out="5">Then TCP opens a reliable pipe with three tiny packets. Nothing is secret yet.</p>
+    <p class="up" data-at="5" data-out="6">The very first TLS message is the <b class="c-priv">ClientHello</b>. Here the security conversation begins.</p>
+    <p class="up" data-at="6">With HTTP/3, the pipe uses QUIC instead of TCP, but the same TLS 1.3 messages travel inside it.</p>
+  </div>
+  <span data-at="6"></span>
+</section>
+
+<!-- ============ CLIENT HELLO ============ -->
+<section class="slide" id="s-ch">
+  <aside class="notes">Open the ClientHello. Point at the key_share: the browser already sends a fresh public key in its very first message. Point at server_name: that is how one server with thousands of sites picks the right certificate.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>ClientHello, opened up</h2>
+  <div class="scene">
+    <div class="pkt-card">
+      <div class="ph"><span>Browser → server · in the clear</span><span>ClientHello</span></div>
+      <div class="f" data-st="1:cur;2:"><span>versions</span><span>TLS 1.3, TLS 1.2</span></div>
+      <div class="f" data-st="2:cur;3:"><span>random</span><span>9f1c04ae 7b3d52e0 c8a1… (32 bytes)</span></div>
+      <div class="f" data-st="3:cur;4:"><span>cipher_suites</span><span>TLS_AES_128_GCM_SHA256<br>TLS_AES_256_GCM_SHA384<br>TLS_CHACHA20_POLY1305_SHA256</span></div>
+      <div class="f" data-st="4:cur;5:"><span>server_name</span><span class="c-ok">www.bank.com</span></div>
+      <div class="f" data-st="5:cur;6:"><span>supported_groups</span><span>X25519MLKEM768, x25519, secp256r1, secp384r1</span></div>
+      <div class="f" data-st="6:cur;7:"><span>key_share</span><span class="c-pub">x25519: 3a9f52c1 e07d4b88 91f2… (32 bytes)</span></div>
+      <div class="f" data-st="7:cur;8:"><span>signature_algs</span><span>ecdsa_secp256r1_sha256, rsa_pss_rsae_sha256, ecdsa_secp384r1_sha384, …</span></div>
+    </div>
+    <div class="pkt-ex">
+      <div class="up" data-at="0" data-out="1"><h3>"Hello, here is what I can do."</h3><p class="c-mute">The browser's opening message. Let's read it line by line.</p></div>
+      <div class="up" data-at="1" data-out="2"><h3>Versions</h3><p>Which TLS versions I speak. Today, almost always TLS 1.3.</p></div>
+      <div class="up" data-at="2" data-out="3"><h3>Random</h3><p>32 fresh random bytes. They make every handshake unique, so old messages can't be replayed.</p></div>
+      <div class="up" data-at="3" data-out="4"><h3>Cipher suites</h3><p>The bulk-encryption methods I support, best first. The server will pick one.</p></div>
+      <div class="up" data-at="4" data-out="5"><h3>Server name (SNI)</h3><p>Which website I want. One server can host thousands of sites; this tells it which certificate to send.</p></div>
+      <div class="up" data-at="5" data-out="6"><h3>Supported groups</h3><p>The key-exchange maths I support. Newer browsers include a post-quantum mix (X25519MLKEM768).</p></div>
+      <div class="up" data-at="6" data-out="7"><h3 class="c-pub">Key share: my public key</h3><p>The browser has <b>already made a fresh key pair</b> and sends its public half now. This saves a whole round trip.</p></div>
+      <div class="up" data-at="7" data-out="8"><h3>Signature algorithms</h3><p>Which signatures I can check. The server's certificate must use one of these.</p></div>
+      <div class="up" data-at="8"><h3 class="c-bad">No secrets yet</h3><p>The ClientHello is not encrypted. Anyone on the path can read it. That is fine: it contains only public things.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ EPHEMERAL ============ -->
+<section class="slide" id="s-eph">
+  <aside class="notes">The browser makes its own key pair for this one connection. Pick a random secret a. Compute A = a × G, the same jump idea as the toy clock. Send A. Delete a afterwards: that is forward secrecy.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>How the browser makes its own key pair, in a millisecond</h2>
+  <div class="scene">
+    <div class="mach">
+      <svg class="ico dice keep" data-at="1"><use href="#i-dice"/></svg>
+      <div class="up" data-at="1"><div class="label">secret</div><div class="val c-priv">a = 5f1c9a07 31e8…<br><span class="c-mute" style="font-size:17px">random, 256 bits</span></div></div>
+      <div class="arrow up" data-at="2">→</div>
+      <div class="box up" data-at="2">× G<div class="label" style="margin-top:10px">"jump a times"</div></div>
+      <div class="arrow up" data-at="2">→</div>
+      <div class="up" data-at="2"><div class="label">public</div><div class="val c-pub">A = 3a9f52c1 e07d…<br><span class="c-mute" style="font-size:17px">goes in key_share</span></div></div>
+      <div class="arrow up" data-at="3">→</div>
+      <div class="chip pub pop" data-at="3"><svg class="ico"><use href="#i-mail"/></svg>ClientHello</div>
+    </div>
+    <div class="note">
+      <div class="up" data-at="4"><b class="c-priv">Ephemeral = used once.</b> The secret <span class="mono c-priv">a</span> lives only for this connection, then it is deleted. Even if someone steals the server's keys next year, today's recorded traffic stays locked. This is called <b>forward secrecy</b>.</div>
+      <div class="up" data-at="5"><b class="c-ok">The server does the same.</b> It picks its own secret <span class="mono c-priv">b</span>, computes <span class="mono c-pub">B = b × G</span>, and sends B back. Now, how do two public keys become one shared secret?</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PAINT ============ -->
+<section class="slide" id="s-paint">
+  <aside class="notes">The classic paint analogy for Diffie–Hellman. Mixing is easy, un-mixing is hard. Both sides end with the same brown, and Mallory, who saw every message, cannot make it.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>Making a shared secret in public, with paint</h2>
+  <div class="scene">
+    <div class="hd c-pub" style="left:150px"><svg class="ico"><use href="#i-browser"/></svg><span style="color:var(--paper)">You</span></div>
+    <div class="hd c-bad" style="left:690px"><svg class="ico"><use href="#i-hacker"/></svg><span style="color:var(--paper)">Mallory sees everything sent</span></div>
+    <div class="hd c-ok" style="left:1230px"><svg class="ico"><use href="#i-server"/></svg><span style="color:var(--paper)">bank.com</span></div>
+    <div class="blob y" data-at="1" data-pos="0:648,48"><span>public paint</span></div>
+    <div class="blob y" data-at="1" data-pos="0:648,48;1:53,48"></div>
+    <div class="blob y" data-at="1" data-pos="0:648,48;1:1133,48"></div>
+    <div class="blob r pop" data-at="2" data-pos="0:163,48"><span class="c-priv">secret a</span></div>
+    <div class="blob bl pop" data-at="2" data-pos="0:1243,48"><span class="c-priv">secret b</span></div>
+    <svg class="over">
+      <path class="wire draw" data-at="3" pathLength="1" d="M95 162 L128 182 M205 162 L172 182 M1175 162 L1208 182 M1285 162 L1252 182"/>
+    </svg>
+    <div class="blob o pop" data-at="3" data-pos="0:108,178"><span>A = mix</span></div>
+    <div class="blob g pop" data-at="3" data-pos="0:1188,178"><span>B = mix</span></div>
+    <div class="blob o" data-at="4" data-out="5" data-pos="3:108,178;4:1188,308"></div>
+    <div class="blob g" data-at="4" data-out="5" data-pos="3:1188,178;4:108,308"></div>
+    <div class="blob o" data-at="4" data-pos="3:648,178;4:588,178"></div>
+    <div class="blob g" data-at="4" data-pos="3:648,178;4:708,178"></div>
+    <div class="blob br pop" data-at="5" data-pos="0:108,308"><span>B + secret a</span></div>
+    <div class="blob br pop" data-at="5" data-pos="0:1188,308"><span>A + secret b</span></div>
+    <div class="speech bad pop" data-at="6" style="left:500px;top:300px;max-width:380px">I have yellow, orange and green. I can't un-mix them, so I can't make the brown.</div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">Start with a paint colour everyone knows. It is public.</p>
+    <p class="up" data-at="2" data-out="3">Each side secretly picks its own colour. Secrets never leave home.</p>
+    <p class="up" data-at="3" data-out="4">Each side mixes its secret into the public paint. Mixing is easy.</p>
+    <p class="up" data-at="4" data-out="5">They swap the mixtures in public. Mallory sees both.</p>
+    <p class="ok up" data-at="5" data-out="6">Each adds its own secret to what it received. Both get the same brown!</p>
+    <p class="up" data-at="6" data-out="7">Un-mixing paint is hard. Mallory saw everything but cannot make the brown.</p>
+    <p class="pub up" data-at="7">In real life: paint = point G · secrets = a, b · mixes = A = a×G, B = b×G · brown = a×b×G. This is Diffie–Hellman key exchange.</p>
+  </div>
+</section>
+
+<!-- ============ SERVER HELLO ============ -->
+<section class="slide" id="s-sh">
+  <aside class="notes">The server answers with its choices and its own key share. From the very next message on, everything is encrypted.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>ServerHello: the server answers</h2>
+  <div class="scene">
+    <div class="pkt-card">
+      <div class="ph"><span>Server → browser · in the clear</span><span>ServerHello</span></div>
+      <div class="f" data-st="1:cur;2:"><span>version</span><span>TLS 1.3</span></div>
+      <div class="f" data-st="2:cur;3:"><span>random</span><span>4be1d0c7 22aa9f13… (32 bytes)</span></div>
+      <div class="f" data-st="3:cur;4:"><span>cipher_suite</span><span class="c-ok">TLS_AES_128_GCM_SHA256</span></div>
+      <div class="f" data-st="4:cur;5:"><span>key_share</span><span class="c-pub">x25519: B = 9e04b7a2 51cd38f0… (32 bytes)</span></div>
+    </div>
+    <div class="panel up" data-at="5" style="position:absolute;left:0;top:300px;width:700px;padding:18px 22px">
+      <div class="label" style="display:flex;gap:10px;align-items:center"><svg class="ico c-priv" style="font-size:22px"><use href="#i-lock"/></svg>Next, encrypted</div>
+      <div class="mono" style="font-size:18px;line-height:1.7;margin-top:10px">EncryptedExtensions · <span class="c-ca">Certificate · CertificateVerify</span> · Finished</div>
+    </div>
+    <div class="pkt-ex">
+      <div class="up" data-at="0" data-out="1"><h3>"Hello. Here is what we will use."</h3><p class="c-mute">The server picks from the browser's lists.</p></div>
+      <div class="up" data-at="1" data-out="2"><h3>Version</h3><p>We will speak TLS 1.3.</p></div>
+      <div class="up" data-at="2" data-out="3"><h3>Random</h3><p>The server's own 32 fresh random bytes.</p></div>
+      <div class="up" data-at="3" data-out="4"><h3>Cipher suite</h3><p>The one bulk-encryption method both sides will use: AES-128 in GCM mode.</p></div>
+      <div class="up" data-at="4" data-out="5"><h3 class="c-pub">Key share: B</h3><p>The server's fresh public key, made from its secret <span class="mono c-priv">b</span>. Now both sides have what they need.</p></div>
+      <div class="up" data-at="5"><h3>From here on, everything is encrypted</h3><p>Both sides can already compute the shared secret. The rest of the handshake, including the certificate, travels encrypted.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CALC ============ -->
+<section class="slide" id="s-calc">
+  <aside class="notes">Both compute the same number: a × B = b × A = a × b × G. Mallory has only A and B. Then a key-derivation step turns this shared secret into the actual session keys.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>Both sides now compute the same secret</h2>
+  <div class="scene">
+    <div class="side up" data-at="1" style="left:0"><h3 class="c-pub"><svg class="ico"><use href="#i-browser"/></svg><span style="color:var(--paper)">Browser</span></h3><p>knows <span class="c-priv">a</span>, received <span class="c-pub">B</span><br><span class="c-priv">a</span> × <span class="c-pub">B</span> = a × b × G</p></div>
+    <div class="side up" data-at="1" style="left:860px"><h3 class="c-ok"><svg class="ico"><use href="#i-server"/></svg><span style="color:var(--paper)">Server</span></h3><p>knows <span class="c-priv">b</span>, received <span class="c-pub">A</span><br><span class="c-priv">b</span> × <span class="c-pub">A</span> = b × a × G</p></div>
+    <div class="eq pop" data-at="2"><div class="blob br"></div><div class="t">same shared secret<br>a × b × G</div></div>
+    <div class="funnel">
+      <div class="box up" data-at="3">shared secret<br>+ hash of ClientHello<br>&nbsp;&nbsp;and ServerHello</div>
+      <div class="arrow up" data-at="3">→</div>
+      <div class="box up" data-at="3" style="border-color:var(--priv);color:var(--priv)">HKDF<br><span class="c-mute" style="font-size:15px">key "mixer"</span></div>
+      <div class="arrow up" data-at="3">→</div>
+      <div class="keys">
+        <span class="chip priv up" data-at="4"><svg class="ico"><use href="#i-key"/></svg>handshake keys · encrypt the rest of the handshake</span>
+        <span class="chip priv up" data-at="4" style="transition-delay:.15s"><svg class="ico"><use href="#i-key"/></svg>session key · browser → server</span>
+        <span class="chip priv up" data-at="4" style="transition-delay:.3s"><svg class="ico"><use href="#i-key"/></svg>session key · server → browser</span>
+      </div>
+    </div>
+  </div>
+  <div class="cap">
+    <p class="ok up" data-at="2" data-out="3">Same number on both sides, and it never crossed the wire.</p>
+    <p class="up" data-at="3" data-out="4">A key-derivation function stirs the shared secret with a fingerprint of the conversation.</p>
+    <p class="up" data-at="4" data-out="5">Out come the session keys: one for each direction.</p>
+    <p class="bad up" data-at="5">Mallory has only A and B. To get the secret she must go backwards from A to a. With real-size numbers, she can't.</p>
+  </div>
+</section>
+
+<!-- ============ AEAD ============ -->
+<section class="slide" id="s-aead">
+  <aside class="notes">Session keys in action. Each request is encrypted with AES-GCM, which also adds a tag. Change one bit and the tag check fails. The key pair only set things up; symmetric encryption carries the data because it is fast.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>The session key at work</h2>
+  <div class="scene">
+    <svg class="over"><line class="wire" x1="560" y1="100" x2="820" y2="100"/></svg>
+    <div class="chip up" data-at="1" style="position:absolute;left:0;top:78px">GET /account HTTP/1.1</div>
+    <div class="aes up" data-at="2" style="left:340px;top:40px">AES-GCM<small>encrypt with session key</small></div>
+    <div class="chip priv ct" data-at="3" data-out="5" data-pos="2:380,190;3:520,190">17 03 03 00 4a 9f 3c e1 … | tag 8e2b</div>
+    <div class="chip bad ct" data-at="5" data-out="6" style="position:absolute;left:520px;top:190px">17 03 03 00 4a 9f <u>3d</u> e1 … | tag 8e2b</div>
+    <div class="aes up" data-at="4" style="left:840px;top:40px;border-color:var(--ok);color:var(--ok);background:var(--ok-a)">AES-GCM<small>decrypt + check tag</small></div>
+    <div class="chip ok pop" data-at="4" data-out="5" style="position:absolute;left:1080px;top:78px"><svg class="ico"><use href="#i-check"/></svg>GET /account</div>
+    <div class="chip bad pop" data-at="5" style="position:absolute;left:1080px;top:78px"><svg class="ico"><use href="#i-x"/></svg>tag fails · closed</div>
+    <div class="actor mal pop" data-at="5" style="left:600px;top:270px"><svg class="ico" style="font-size:72px"><use href="#i-hacker"/></svg><span class="nm">Mallory flips one bit</span></div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">Your browser wants to send a normal web request.</p>
+    <p class="up" data-at="2" data-out="3">It encrypts the request with the browser → server session key.</p>
+    <p class="up" data-at="3" data-out="4">On the wire it is noise, plus a short "tag", a tamper seal made with the key.</p>
+    <p class="ok up" data-at="4" data-out="5">The server decrypts it and checks the tag. ✓</p>
+    <p class="bad up" data-at="5" data-out="6">If anyone changes even one bit, the tag check fails and the connection is closed.</p>
+    <p class="up" data-at="6">Secrecy ✓ Integrity ✓. Symmetric keys do the heavy lifting because they are very fast.</p>
+  </div>
+  <span data-at="6"></span>
+</section>
+
+<!-- ============ TWIST ============ -->
+<section class="slide" id="s-twist">
+  <aside class="notes">The twist: who did we just agree a secret with? Mallory can run the whole key exchange with you, and a second one with the bank. Key exchange gives secrecy with whoever answered, not proof of who answered.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>But wait: who did we just make a secret with?</h2>
+  <div class="scene">
+    <svg class="over"><line class="wire" x1="170" y1="108" x2="610" y2="108"/><line class="wire" x1="770" y1="108" x2="1220" y2="108"/></svg>
+    <div class="actor you" style="left:0;top:60px"><svg class="ico"><use href="#i-browser"/></svg><span class="nm">You</span></div>
+    <div class="actor mal" style="left:610px;top:60px"><svg class="ico"><use href="#i-hacker"/></svg><span class="nm">Mallory</span></div>
+    <div class="actor bank" style="left:1220px;top:60px"><svg class="ico"><use href="#i-server"/></svg><span class="nm">bank.com</span></div>
+    <div class="chip pub" data-at="1" data-pos="0:180,40;1:440,40">ClientHello (A)</div>
+    <div class="chip bad" data-at="2" data-pos="1:440,40;2:180,160">ServerHello (M) "I'm bank.com"</div>
+    <div class="blob br pop" data-at="3" data-pos="0:345,250"><span>secret 1 · you ⇄ Mallory</span></div>
+    <div class="blob br pop" data-at="3" data-pos="0:950,250" style="filter:hue-rotate(25deg)"><span>secret 2 · Mallory ⇄ bank</span></div>
+    <div class="speech bad pop" data-at="4" style="left:500px;top:380px;max-width:420px">I decrypt with secret 1, read it, re-encrypt with secret 2. Both sides think all is fine.</div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">Your ClientHello reaches Mallory instead of the bank.</p>
+    <p class="up" data-at="2" data-out="3">She answers with her own key share M, as if she were bank.com.</p>
+    <p class="up" data-at="3" data-out="4">You now share a perfect secret… with Mallory. She makes a second one with the bank.</p>
+    <p class="bad up" data-at="4">Key exchange gives secrecy with whoever answered. It says nothing about who answered. This is where certificates come in.</p>
+  </div>
+</section>
+
+<!-- ============ CERT VERIFY ============ -->
+<section class="slide" id="s-cv">
+  <aside class="notes">This is where the CA's work plugs in. The server sends its certificate chain, then signs the entire conversation so far, including the key shares, with its private key. The browser checks the chain, the name, and that signature. Only the real key holder could make it.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>Certificate + CertificateVerify: proof of identity</h2>
+  <div class="scene lanes">
+    <div class="lane-h c-pub" style="left:110px"><svg class="ico"><use href="#i-browser"/></svg><span style="color:var(--paper)">Browser</span></div>
+    <div class="lane-h c-ok" style="left:1270px"><svg class="ico"><use href="#i-server"/></svg><span style="color:var(--paper)">bank.com</span></div>
+    <div class="cert sm" data-at="1" data-pos="0:960,110;1:250,104"><div class="ch"><span>Leaf</span><svg class="ico"><use href="#i-seal"/></svg></div><div class="row"><span>Name</span><span>www.bank.com</span></div><div class="row"><span>Key</span><span class="c-pub">B-pub 04 6b17…</span></div><div class="row"><span>Issuer</span><span class="c-ca">Example CA R3</span></div></div>
+    <div class="cert sm" data-at="1" data-pos="0:960,260;1:250,254" style="transition-delay:.15s"><div class="ch"><span>Intermediate</span><svg class="ico"><use href="#i-seal"/></svg></div><div class="row"><span>Name</span><span class="c-ca">Example CA R3</span></div><div class="row"><span>Issuer</span><span class="c-ca">Example Root</span></div></div>
+    <div class="panel up" data-at="2" style="position:absolute;left:620px;top:110px;width:520px;padding:18px 20px;border-color:var(--priv)">
+      <div class="label c-priv">CertificateVerify</div>
+      <p style="font-size:19px;line-height:1.45;margin-top:8px">A signature, made with <b class="c-priv">bank.com's private key</b>, over a fingerprint of everything said so far: both Hellos, <span class="c-pub">A</span>, <span class="c-pub">B</span>, and the certificates.</p>
+    </div>
+    <div class="panel" style="position:absolute;left:620px;top:290px;width:520px;padding:16px 20px;display:flex;flex-direction:column;gap:10px;background:transparent;border:0">
+      <div class="ck up" data-at="3" style="display:flex;gap:12px;font-size:19px"><span class="badge ok" style="width:30px;height:30px;font-size:17px;flex:none">✓</span>Chain leads to a root in my trusted list</div>
+      <div class="ck up" data-at="3" style="display:flex;gap:12px;font-size:19px;transition-delay:.2s"><span class="badge ok" style="width:30px;height:30px;font-size:17px;flex:none">✓</span>Name on the certificate = www.bank.com</div>
+      <div class="ck up" data-at="3" style="display:flex;gap:12px;font-size:19px;transition-delay:.4s"><span class="badge ok" style="width:30px;height:30px;font-size:17px;flex:none">✓</span>CertificateVerify checks out with the public key in the certificate</div>
+      <div class="ck up" data-at="4" style="display:flex;gap:12px;font-size:19px"><span class="badge ok" style="width:30px;height:30px;font-size:17px;flex:none">✓</span>Finished messages match on both sides</div>
+    </div>
+  </div>
+  <div class="cap">
+    <p class="ca up" data-at="1" data-out="2">The server sends its certificate chain. This is the first moment the CA's work enters the conversation.</p>
+    <p class="up" data-at="2" data-out="3">Then it signs the whole conversation, including the key shares, with its private key.</p>
+    <p class="ok up" data-at="3" data-out="4">The browser checks all three. So the key share B really came from whoever holds bank.com's private key.</p>
+    <p class="ok up" data-at="4" data-out="5">Finally, each side sends "Finished": a checksum of the whole handshake. Then the padlock appears.</p>
+    <p class="bad up" data-at="5">Mallory can't sign as bank.com… unless a trusted CA gives her a certificate for bank.com with a key she owns.</p>
+  </div>
+  <span data-at="5"></span>
+</section>
+
+<!-- ============ FULL HANDSHAKE ============ -->
+<section class="slide" id="s-full">
+  <aside class="notes">The whole TLS 1.3 handshake in one round trip. Point at the two violet lines: identity rests entirely on them.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>The whole TLS 1.3 handshake, in one round trip</h2>
+  <div class="scene lanes">
+    <div class="lane-h c-pub" style="left:150px"><svg class="ico"><use href="#i-browser"/></svg><span style="color:var(--paper)">Browser</span></div>
+    <div class="lane-h c-ok" style="left:1230px"><svg class="ico"><use href="#i-server"/></svg><span style="color:var(--paper)">bank.com</span></div>
+    <div class="lane" style="left:150px"></div><div class="lane" style="left:1230px"></div>
+    <div class="msg r pubv" data-at="1" style="left:150px;width:1080px;top:104px"><div class="t">ClientHello + key_share A</div><div class="ln"></div></div>
+    <div class="msg l pubv" data-at="1" style="left:150px;width:1080px;top:150px;transition-delay:.5s"><div class="t">ServerHello + key_share B</div><div class="ln" style="transition-delay:.5s"></div></div>
+    <div class="msg l dimv" data-at="1" style="left:150px;width:1080px;top:196px;transition-delay:1s"><div class="t">{EncryptedExtensions}</div><div class="ln" style="transition-delay:1s"></div></div>
+    <div class="msg l cav" data-at="1" style="left:150px;width:1080px;top:242px;transition-delay:1.4s"><div class="t">{Certificate}</div><div class="ln" style="transition-delay:1.4s"></div></div>
+    <div class="msg l cav" data-at="1" style="left:150px;width:1080px;top:288px;transition-delay:1.8s"><div class="t">{CertificateVerify}</div><div class="ln" style="transition-delay:1.8s"></div></div>
+    <div class="msg l okv" data-at="1" style="left:150px;width:1080px;top:334px;transition-delay:2.2s"><div class="t">{Finished}</div><div class="ln" style="transition-delay:2.2s"></div></div>
+    <div class="msg r okv" data-at="1" style="left:150px;width:1080px;top:380px;transition-delay:2.7s"><div class="t">{Finished}</div><div class="ln" style="transition-delay:2.7s"></div></div>
+    <div class="msg r hot" data-at="1" style="left:150px;width:1080px;top:436px;transition-delay:3.2s"><div class="t">[ GET /account … ] ⇄ [ your data ]</div><div class="ln" style="transition-delay:3.2s"></div></div>
+    <div class="chip ca pop" data-at="2" style="position:absolute;left:1290px;top:248px;white-space:normal;width:120px;line-height:1.3;font-size:15px">identity rests here</div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">{ } = encrypted with handshake keys · [ ] = encrypted with session keys · about 50 ms in total.</p>
+    <p class="ca up" data-at="2">Everything secret was set up by the key exchange. Everything about <b>who</b> rests on two violet lines, and they rest on a CA.</p>
+  </div>
+</section>
+
+<!-- ============ TRUST STACK ============ -->
+<section class="slide" id="s-stack">
+  <aside class="notes">A tower: your password sits on session keys, which sit on CertificateVerify, which sits on the certificate, which sits on the CA's private key. Pull out that block and everything above falls.</aside>
+  <div class="eyebrow"><span class="n">3</span> The handshake</div>
+  <h2>Where the CA's key sits in the chain of events</h2>
+  <div class="scene">
+    <div class="stack">
+      <div class="blk up" data-at="1"><svg class="ico c-ca"><use href="#i-browser"/></svg>Trusted root list in your device</div>
+      <div class="blk up" data-at="1" data-st="2:hot;3:crack" style="transition-delay:.1s"><svg class="ico c-priv"><use href="#i-key"/></svg>Intermediate CA's private key</div>
+      <div class="blk up" data-at="1" data-st="4:fall" style="transition-delay:.2s;--fx:-160px;--fr:-18deg"><svg class="ico c-ca"><use href="#i-seal"/></svg>Certificate for bank.com</div>
+      <div class="blk up" data-at="1" data-st="4:fall" style="transition-delay:.3s;--fx:220px;--fr:22deg"><svg class="ico c-ca"><use href="#i-doc"/></svg>CertificateVerify signature</div>
+      <div class="blk up" data-at="1" data-st="4:fall" style="transition-delay:.4s;--fx:-260px;--fr:-30deg"><svg class="ico c-priv"><use href="#i-key"/></svg>Session keys</div>
+      <div class="blk up" data-at="1" data-st="4:fall" style="transition-delay:.5s;--fx:320px;--fr:35deg"><svg class="ico c-ok"><use href="#i-lock"/></svg>Your password, money, messages</div>
+    </div>
+    <div class="side">
+      <div class="up" data-at="1">Every layer trusts the layer below it.</div>
+      <div class="up" data-at="2">The CA's private key is the block that decides <b>who</b> you are talking to.</div>
+      <div class="up c-bad" data-at="3">Now make that key guessable…</div>
+      <div class="up c-bad" data-at="4"><b>…and everything above it falls.</b> Not just for one website. For every website.</div>
+    </div>
+  </div>
+</section>
+<style>
+.facts{position:absolute;left:0;right:0;top:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.fact{padding:24px 26px;border-radius:12px;background:var(--ink2);border:1px solid var(--line);min-height:150px}
+.fact .label{margin-bottom:10px}
+.fact p{font-size:23px;line-height:1.4}
+.fact .big{font:700 46px/1 var(--f-display);color:var(--priv);display:block;margin-bottom:8px}
+
+#s-cer .hsm{position:absolute;left:0;top:0;width:430px;height:470px;border-radius:18px;border:2px solid var(--ca);background:linear-gradient(180deg,rgba(183,156,255,.10),rgba(183,156,255,.02));display:flex;flex-direction:column;align-items:center;padding-top:26px;box-sizing:border-box}
+#s-cer .hsm .ico{font-size:120px;color:var(--ca)}
+#s-cer .hsm .t{font:600 22px var(--f-body);margin-top:6px}
+#s-cer .hsm .s{font:500 14px/1.4 var(--f-mono);color:var(--mute);text-align:center;margin-top:6px}
+#s-cer .keys24{position:absolute;left:30px;top:250px;width:370px;display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+#s-cer .keys24 span .ico{font-size:26px;color:inherit}
+#s-cer .keys24 span{height:44px;border-radius:6px;background:var(--ok-a);border:1px solid var(--ok);display:grid;place-items:center;color:var(--ok);font-size:24px;transition:all .6s}
+#s-cer .keys24 span[data-s="bad"]{background:var(--bad-a);border-color:var(--bad);color:var(--bad);box-shadow:0 0 18px -2px rgba(255,79,106,.7)}
+#s-cer .side{position:absolute;left:500px;right:0;top:0;display:flex;flex-direction:column;gap:18px}
+#s-cer .side > div{font-size:23px;line-height:1.45;padding-left:20px;border-left:2px solid var(--line2)}
+
+#s-wrong .kc{position:absolute;width:330px;padding:20px 22px;border-radius:14px;border:2px solid var(--line2);background:var(--ink2);transition:all .6s}
+#s-wrong .kc .ico{font-size:52px}
+#s-wrong .kc .lb{font:600 19px/1.3 var(--f-mono);margin-top:10px}
+#s-wrong .kc .st{font:500 15px/1.4 var(--f-mono);color:var(--mute);margin-top:6px}
+#s-wrong .kc.strong{border-color:var(--ok)} #s-wrong .kc.strong .ico{color:var(--ok)}
+#s-wrong .kc.weak .ico{color:var(--ok)}
+#s-wrong .kc.weak[data-s="bad"]{border-color:var(--bad)} #s-wrong .kc.weak[data-s="bad"] .ico{color:var(--bad)}
+#s-wrong .kc.strong[data-s="unused"]{opacity:.35}
+#s-wrong .cursor{width:40px;height:40px;z-index:5}
+#s-wrong .cursor svg{width:40px;height:40px;fill:var(--paper);stroke:var(--ink);stroke-width:1.5}
+#s-wrong .steps{position:absolute;left:820px;right:0;top:0;display:flex;flex-direction:column;gap:12px}
+#s-wrong .steps > div{font-size:21px;line-height:1.4;padding:12px 16px;border-radius:10px;border:1px solid transparent;transition:all .4s}
+#s-wrong .steps > div[data-s="cur"]{background:var(--ink3);border-color:var(--line2)}
+#s-wrong .steps b{font-family:var(--f-mono);color:var(--mute);margin-right:8px}
+
+#s-bytes .grid{position:absolute;left:0;top:30px;display:grid;grid-template-columns:repeat(12,72px);gap:8px}
+#s-bytes .grid span{height:64px;border-radius:8px;display:grid;place-items:center;font:600 24px var(--f-mono);background:var(--priv-a);border:1px solid rgba(255,181,71,.45);color:var(--priv);transition:all .5s}
+#s-bytes .grid span.z{background:var(--ink2);border-color:var(--line);color:var(--dim)}
+#s-bytes .grid span.last{background:var(--bad-a);border-color:var(--bad);color:var(--bad);box-shadow:0 0 24px -4px rgba(255,79,106,.8)}
+#s-bytes .lbl{position:absolute;left:0;top:-8px;font:500 15px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+#s-bytes .vals{position:absolute;left:0;top:340px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+#s-bytes .vals .v{font:700 40px/1 var(--f-display);color:var(--bad);padding:10px 18px;border:1px solid var(--bad);border-radius:10px;background:var(--bad-a)}
+
+#s-brute .tgt{position:absolute;left:0;top:0;width:620px;padding:22px 24px;border-radius:14px;border:1px solid var(--pub);background:var(--pub-a)}
+#s-brute .hex{font:500 20px/1.55 var(--f-mono);word-break:break-all;margin-top:10px;letter-spacing:.03em}
+#s-brute .run{position:absolute;left:680px;right:0;top:0;padding:22px 24px;border-radius:14px;border:1px solid var(--line2);background:var(--ink2);min-height:330px;box-sizing:border-box}
+#s-brute .k{font:800 120px/1 var(--f-display);color:var(--priv);margin:8px 0 6px;font-variant-numeric:tabular-nums}
+#s-brute .cand{font:500 18px/1.5 var(--f-mono);word-break:break-all;color:var(--mute);min-height:56px}
+#s-brute .status{font:600 24px var(--f-body);margin-top:12px;min-height:32px}
+#s-brute .meta{position:absolute;left:0;top:300px;width:620px;font-size:21px;line-height:1.5;color:var(--mute)}
+#s-brute .hit .cand{color:var(--ok)}
+
+#s-quote blockquote{margin:30px 0 0;font:700 78px/1.06 var(--f-display);letter-spacing:-.03em;max-width:1300px;text-wrap:balance}
+#s-quote blockquote .c-priv{font-size:1.1em}
+#s-quote .who{font:500 20px var(--f-mono);color:var(--mute);margin-top:24px;letter-spacing:.06em}
+#s-quote .q2{font:600 36px/1.25 var(--f-display);margin-top:50px;max-width:1100px;color:var(--paper)}
+
+#s-eight .rt{position:absolute;transform:translateX(-50%);padding:14px 20px;border-radius:12px;border:2px solid var(--ca);background:var(--ca-a);font:600 20px var(--f-mono);color:var(--paper);white-space:nowrap;display:flex;gap:10px;align-items:center}
+#s-eight .rt .ico{font-size:34px;color:var(--ca)}
+#s-eight .rt.sec{border-style:dashed;border-color:var(--mute);background:transparent}
+#s-eight .rt.sec .ico{color:var(--mute)}
+#s-eight .im{position:absolute;top:210px;width:156px;padding:12px 10px;border-radius:10px;border:1px solid var(--line2);background:var(--ink2);text-align:center;font:500 15px/1.35 var(--f-mono);transition:all .6s;box-sizing:border-box}
+#s-eight .im b{display:block;font-size:20px;color:var(--paper);margin-top:4px}
+#s-eight .im[data-s="bad"]{border-color:var(--bad);background:var(--bad-a);box-shadow:0 0 28px -6px rgba(255,79,106,.9)}
+#s-eight .im[data-s="bad"] b{color:var(--bad)}
+#s-eight .im .ty{display:inline-block;margin-top:6px;font-size:12px;letter-spacing:.1em;color:var(--mute)}
+#s-eight .grp{position:absolute;top:320px;font:500 14px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute);text-align:center}
+#s-eight .facts2{position:absolute;left:0;right:0;top:380px;display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+#s-eight .facts2 > div{font-size:19px;line-height:1.4;padding:14px 18px;border-radius:10px;background:var(--ink2);border:1px solid var(--line)}
+
+#s-master .tiles{position:absolute;left:0;right:0;top:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+#s-master .tile{height:96px;border-radius:12px;border:1px solid var(--ok);background:var(--ok-a);display:flex;align-items:center;gap:14px;padding:0 20px;font:500 20px var(--f-mono);transition:all .5s;position:relative;overflow:hidden}
+#s-master .tile .ico{font-size:36px;color:var(--ok);flex:none}
+#s-master .tile .ico.o{display:none;color:var(--bad)}
+#s-master .tile[data-s="pwn"]{border-color:var(--bad);background:var(--bad-a)}
+#s-master .tile[data-s="pwn"] .ico.c{display:none} #s-master .tile[data-s="pwn"] .ico.o{display:inline}
+#s-master .key4{position:absolute;left:50%;top:410px;transform:translateX(-50%);display:flex;gap:14px;align-items:center;font:800 64px/1 var(--f-display);color:var(--priv)}
+#s-master .key4 .ico{font-size:80px}
+
+#s-atk .list{position:absolute;left:0;top:0;width:520px;display:flex;flex-direction:column;gap:6px}
+#s-atk .list > div{font-size:19px;line-height:1.35;padding:10px 14px;border-radius:10px;border:1px solid transparent;color:var(--dim);transition:all .4s}
+#s-atk .list > div b{display:block;font:600 14px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+#s-atk .list > div[data-s="cur"]{color:var(--paper);background:var(--ink3);border-color:var(--line2)}
+#s-atk .list > div[data-s="cur"] b{color:var(--bad)}
+#s-atk .list > div[data-s="done"]{color:var(--mute)}
+#s-atk .stg{position:absolute;left:580px;right:0;top:0;bottom:0}
+#s-atk .actor .ico{font-size:72px}
+#s-atk .chk{display:flex;gap:10px;font-size:17px;align-items:center}
+#s-atk .chk .badge{width:26px;height:26px;font-size:15px;flex:none}
+
+.fall-tiles{position:absolute;left:0;right:0;top:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.fall-tiles .t{padding:24px 26px;border-radius:12px;background:var(--ink2);border:1px solid var(--line);min-height:170px}
+.fall-tiles .t .ico{font-size:44px;color:var(--bad)}
+.fall-tiles .t h3{font-size:26px;margin-top:12px}
+.fall-tiles .t p{font-size:18px;line-height:1.45;color:var(--mute);margin-top:8px}
+.stat-tiles{position:absolute;left:0;right:0;top:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.stat-tiles .t{padding:26px 28px;border-radius:12px;background:var(--ink2);border:1px solid var(--line);min-height:150px}
+.stat-tiles .n{font:800 60px/1 var(--f-display);color:var(--bad);font-variant-numeric:tabular-nums}
+.stat-tiles p{font-size:20px;line-height:1.4;margin-top:12px;color:var(--paper)}
+.stat-tiles small{display:block;font:500 13px var(--f-mono);color:var(--mute);margin-top:8px;letter-spacing:.04em}
+
+#s-ct .log{position:absolute;left:0;top:0;width:470px;height:420px;overflow:hidden}
+#s-ct .log .hd{position:relative;z-index:2;background:var(--ink2);display:flex;gap:10px;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line);font:500 14px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+#s-ct .log .rows{padding:6px 0;animation:rootscroll 22s linear infinite}
+#s-ct .log .rows div{font:500 15px/1 var(--f-mono);padding:9px 18px;color:var(--paper);display:flex;justify-content:space-between;gap:10px}
+#s-ct .log .rows div span:last-child{color:var(--dim)}
+#s-ct .br{position:absolute;left:540px;right:0;padding:18px 22px;border-radius:12px;border:1px solid var(--line2);background:var(--ink2);font-size:19px;line-height:1.42}
+#s-ct .br h3{font-size:24px;margin-bottom:6px}
+
+#s-gap .axis{position:absolute;left:30px;right:30px;top:250px;height:2px;background:var(--line2)}
+#s-gap .tick{position:absolute;top:276px;font:500 13px var(--f-mono);color:var(--dim);transform:translateX(-50%);letter-spacing:.06em}
+#s-gap .tick::before{content:"";position:absolute;left:50%;top:-12px;height:8px;border-left:1px solid var(--line2)}
+#s-gap .band{position:absolute;top:236px;height:30px;left:100px;width:1191px;background:repeating-linear-gradient(135deg,rgba(255,79,106,.55) 0 10px,rgba(255,79,106,.25) 10px 20px);border-radius:4px;transform-origin:left center;transition:transform 2.2s var(--ease),opacity .3s}
+#s-gap .band[data-at]{opacity:1}
+#s-gap .band[data-at]:not(.in){transform:scaleX(0)}
+#s-gap .ev{position:absolute;width:250px;min-height:120px;font-size:17px;line-height:1.35;padding:10px 12px;border-radius:10px;background:var(--ink2);border:1px solid var(--line);box-sizing:border-box}
+#s-gap .ev b{display:block;font:600 13px var(--f-mono);letter-spacing:.08em;color:var(--mute);margin-bottom:4px;text-transform:uppercase}
+#s-gap .pin{position:absolute;width:2px;background:var(--line2)}
+
+#s-find .msgc{position:absolute;left:620px;right:0;top:0;padding:24px 26px;border-radius:14px;background:#EEF0F6;color:#121a2e}
+#s-find .msgc .m{font:700 38px/1.15 var(--f-display);letter-spacing:-.01em}
+#s-find .sigs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+#s-find .sigs div{border:2px solid #D98E1C;color:#9a5e07;border-radius:8px;padding:8px 6px;font:600 13px/1.3 var(--f-mono);text-align:center;background:rgba(217,142,28,.08)}
+#s-find .sigs div .ico{font-size:26px;display:block;margin:0 auto 4px}
+#s-find .left{position:absolute;left:0;top:0;width:560px;display:flex;flex-direction:column;gap:18px}
+#s-find .left > div{font-size:22px;line-height:1.45}
+
+#s-days .cols{position:absolute;left:0;right:0;top:-6px;display:grid;grid-template-columns:repeat(5,1fr) 160px;gap:14px}
+#s-days .col h3{font-size:26px;padding-bottom:10px;border-bottom:2px solid var(--priv);margin-bottom:10px}
+#s-days .col h3 small{display:block;font:500 12px var(--f-mono);color:var(--mute);letter-spacing:.1em;text-transform:uppercase;margin-top:4px}
+#s-days .ev{font-size:18px;line-height:1.32;margin-bottom:11px}
+#s-days .ev b{font:600 14px var(--f-mono);color:var(--priv);display:block}
+#s-days .ev.k{color:var(--ok)}
+#s-days .col.fut h3{border-color:var(--dim);color:var(--mute)}
+</style>
+
+<!-- ============ CH 4 ============ -->
+<section class="slide chapter" id="s-ch4" data-steps="0">
+  <canvas class="guilloche" data-color="255,79,106" data-seed="7"></canvas>
+  <div class="num">4</div>
+  <h2>The key was 4</h2>
+  <p class="lead">Now we have every piece. Here is what happened at eMudhra, and why it mattered for everyone.</p>
+</section>
+
+<!-- ============ WHO ============ -->
+<section class="slide" id="s-who">
+  <aside class="notes">eMudhra is a real, established, listed Indian company. Website certificates are a small part of its business. But inside a browser's trust list, small CAs have the same power as giant ones.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>Who is eMudhra?</h2>
+  <div class="scene">
+    <div class="facts">
+      <div class="fact up" data-at="1"><div class="label">Company</div><p>Indian digital-trust company, listed on Indian stock exchanges. Brand name: <b>emSign</b>.</p></div>
+      <div class="fact up" data-at="1" style="transition-delay:.12s"><div class="label">Where</div><p>Certificate companies in <b>India</b>, the <b>US</b> and the <b>Netherlands</b>.</p></div>
+      <div class="fact up" data-at="1" style="transition-delay:.24s"><div class="label">In India</div><p>Licensed CA for digital signature certificates and Aadhaar-based eSign, under India's Controller of Certifying Authorities.</p></div>
+      <div class="fact up" data-at="2"><span class="big">60M+</span><p>digital certificates issued, by its own count.</p></div>
+      <div class="fact up" data-at="2" style="transition-delay:.12s"><span class="big">≈ 1%</span><p>of revenue comes from website (TLS) certificates worldwide.</p></div>
+      <div class="fact up" data-at="2" style="transition-delay:.24s"><span class="big">4 / 4</span><p>big root programs trusted its roots: Mozilla, Chrome, Apple, Microsoft.</p></div>
+    </div>
+  </div>
+  <div class="cap"><p class="bad up" data-at="3">A small part of their business. But inside your browser's trust list, a small CA has exactly the same power as the biggest one.</p></div>
+</section>
+
+<!-- ============ CEREMONY ============ -->
+<section class="slide" id="s-cer">
+  <aside class="notes">A key ceremony is a filmed, scripted, audited event. Keys are born inside an HSM, a tamper-proof box. On 30 April 2025 eMudhra made a batch of 24 intermediate keys. Eight of them were broken from birth.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>30 April 2025: the key ceremony</h2>
+  <div class="scene">
+    <div class="hsm up" data-at="2"><svg class="ico"><use href="#i-vault"/></svg><div class="t">HSM: hardware security module</div><div class="s">tamper-proof key vault · eMudhra used<br>Utimaco HSMs (FIPS 140-2 Level 3)</div>
+      <div class="keys24" id="keys24"></div>
+    </div>
+    <div class="side">
+      <div class="up" data-at="1"><b>Key ceremony</b> = a scripted, filmed, audited event where a CA creates new signing keys. Every step is written down in advance.</div>
+      <div class="up" data-at="2"><b>HSM</b> = a locked hardware box. Keys are supposed to be born inside it from good randomness and never leave it in readable form.</div>
+      <div class="up" data-at="3"><b>30 April 2025:</b> eMudhra creates a batch of 24 new intermediate CA keys under its <span class="c-ca">emSign ECC Root CA - G3</span> hierarchy.</div>
+      <div class="up" data-at="4"><b>Mid-2025:</b> the hierarchy is trusted by browsers. In May 2025 Sectigo cross-signs eight of the intermediates. Two yearly audits pass.</div>
+      <div class="up c-bad" data-at="5"><b>Eight of these keys were broken from the moment they were made.</b></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT WENT WRONG ============ -->
+<section class="slide" id="s-wrong">
+  <aside class="notes">eMudhra's own explanation, still under investigation. A test of key wrapping created a second, weak key pair with a similar label. Staff used the weak one to make the certificate requests. Human errors at multiple steps.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>What went wrong, by eMudhra's own account</h2>
+  <div class="scene">
+    <div class="kc strong up" data-at="1" data-st="5:unused" style="left:0;top:30px"><svg class="ico"><use href="#i-key"/></svg><div class="lb">EM DV TLS CA G3B</div><div class="st">strong · random 384-bit</div></div>
+    <div class="kc weak up" data-at="3" data-st="5:bad" style="left:380px;top:30px"><svg class="ico"><use href="#i-key"/></svg><div class="lb">EM DV TLS CA G3B′</div><div class="st" data-out="5">looks the same…</div></div>
+    <div class="chip bad pop" data-at="5" style="position:absolute;left:400px;top:200px">private key &lt; 256</div>
+    <div class="cursor" data-at="4" data-pos="3:200,260;4:600,120"><svg viewBox="0 0 24 24"><path d="M4 2l16 10-7 1.5 4 7.5-3 1.5-4-7.5L5 20z"/></svg></div>
+    <div class="chip ca up" data-at="5" style="position:absolute;left:0;top:300px"><svg class="ico"><use href="#i-seal"/></svg>root signs a certificate for the weak key</div>
+    <div class="panel up" data-at="6" style="position:absolute;left:0;top:390px;width:740px;padding:16px 20px;font-size:18px;line-height:1.45;border-color:var(--priv)"><b class="c-priv">Still open:</b> how a certified HSM ended up with a key below 256, who approved the test step, and why nobody noticed. eMudhra says it will re-check every key ceremony it has run. Labels shown are illustrative.</div>
+    <div class="steps">
+      <div class="up" data-at="1" data-st="1:cur;2:"><b>1</b>The HSM makes a proper, strong key pair.</div>
+      <div class="up" data-at="2" data-st="2:cur;3:"><b>2</b>An "approved deviation": a test of key wrap / unwrap (exporting a key in encrypted form and loading it back).</div>
+      <div class="up" data-at="3" data-st="3:cur;4:"><b>3</b>A flaw in that test code creates a second key pair on the HSM. It is weak.</div>
+      <div class="up" data-at="4" data-st="4:cur;5:"><b>4</b>The labels look alike. Staff pick the weak key to make the certificate requests.</div>
+      <div class="up" data-at="5" data-st="5:cur;6:"><b>5</b>The root signs certificates for the weak keys. Browsers trust them. The strong keys sit unused.</div>
+      <div class="up" data-at="6" data-st="6:cur"><b>6</b>"There were human errors in multiple steps of the process." — eMudhra</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BYTES ============ -->
+<section class="slide" id="s-bytes" data-steps="3">
+  <aside class="notes">A P-384 private key is 48 bytes. A good one is 48 random bytes. eMudhra's were 47 bytes of zero followed by one small byte. Researchers published the values: 4, 56, 66, 115, 155, 156, 230, 237.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>How weak is weak? Look at the bytes.</h2>
+  <div class="scene">
+    <div class="lbl" id="bytes-lbl">A good P-384 private key: 48 random bytes</div>
+    <div class="grid" id="bytes-grid"></div>
+    <div class="vals">
+      <span class="label up" data-at="2" style="margin-right:6px">Recovered keys</span>
+      <span class="v pop" data-at="2">4</span><span class="v pop" data-at="2" style="transition-delay:.08s">56</span><span class="v pop" data-at="2" style="transition-delay:.16s">66</span><span class="v pop" data-at="2" style="transition-delay:.24s">115</span><span class="v pop" data-at="2" style="transition-delay:.32s">155</span><span class="v pop" data-at="2" style="transition-delay:.4s">156</span><span class="v pop" data-at="2" style="transition-delay:.48s">230</span><span class="v pop" data-at="2" style="transition-delay:.56s">237</span>
+    </div>
+  </div>
+  <div class="cap">
+    <p class="bad up" data-at="1" data-out="2">eMudhra's weak keys: 47 bytes of zero, then one small byte.</p>
+    <p class="up" data-at="2" data-out="3">Values published by researchers. Every one is below 256: it fits in a single byte.</p>
+    <p class="bad up" data-at="3">One byte = 256 possibilities. A combination lock with 256 settings, guarding certificates for the whole web.</p>
+  </div>
+</section>
+
+<!-- ============ BRUTE FORCE (live) ============ -->
+<section class="slide" id="s-brute" data-steps="3">
+  <aside class="notes">This is real P-384 maths running live in the browser, not a video. The target is the actual public key a certificate would carry if its private key were 4. We try k = 1, 2, 3, 4 and find a match. Then we try all 255 values and time it.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>Recovering the key: live, in this slide</h2>
+  <div class="scene">
+    <div class="tgt">
+      <div class="label c-pub">Public key printed inside the certificate · x-coordinate</div>
+      <div class="hex c-pub">138251cd52ac9298c1c8aad977321deb97e709bd0b4ca0aca55dc8ad51dcfc9d1589a1597e3a5120e1efd631c63e1835</div>
+    </div>
+    <div class="meta">
+      <p class="up" data-at="0">Anyone can download any certificate. Its public key is right there.</p>
+      <p class="up" data-at="1" style="margin-top:12px">The attacker's plan: compute <span class="mono">k × G</span> for k = 1, 2, 3, … and compare with the public key. A match means k is the private key.</p>
+      <p class="up c-paper" data-at="3" style="margin-top:12px;color:var(--paper)">This page is doing real P-384 elliptic-curve maths with your device's CPU.</p>
+    </div>
+    <div class="run" id="brute-run">
+      <div class="label">Trying private key k =</div>
+      <div class="k" id="brute-k">–</div>
+      <div class="cand mono" id="brute-cand">waiting…</div>
+      <div class="status" id="brute-status"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ QUOTE ============ -->
+<section class="slide" id="s-quote">
+  <aside class="notes">Scott Helme, a well-known security researcher, recovered all eight keys on a laptop in under a second.</aside>
+  <div class="eyebrow">Scott Helme, security researcher</div>
+  <blockquote class="up" data-at="0">"One of eMudhra's certificate authority private keys is the number <span class="c-priv">4</span>."</blockquote>
+  <div class="who up" data-at="0">Recovered all eight keys from public certificates, on a laptop, in under a second.</div>
+  <p class="q2 up" data-at="1">"The key was effectively public from the day the certificate existed."</p>
+</section>
+
+<!-- ============ THE EIGHT ============ -->
+<section class="slide" id="s-eight">
+  <aside class="notes">Eight intermediates. Six for websites at three validation levels, two for code signing. Each existed twice: once under eMudhra's own root, once cross-signed by Sectigo's old AAA root, which is still trusted by many non-browser systems.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>The eight broken intermediates</h2>
+  <div class="scene">
+    <svg class="over" id="eight-lines"></svg>
+    <div class="rt up" data-at="1" style="left:460px;top:0"><svg class="ico"><use href="#i-vault"/></svg>emSign ECC Root CA - G3</div>
+    <div class="rt sec up" data-at="2" style="left:1020px;top:0"><svg class="ico"><use href="#i-vault"/></svg>Sectigo AAA Certificate Services</div>
+    <div class="im up" data-at="1" data-st="3:bad" style="left:0"><span>EM DV TLS CA</span><b>G3B</b><span class="ty">WEBSITES</span></div>
+    <div class="im up" data-at="1" data-st="3:bad" style="left:176px;transition-delay:.05s"><span>EM DV TLS CA</span><b>G3C</b><span class="ty">WEBSITES</span></div>
+    <div class="im up" data-at="1" data-st="3:bad" style="left:352px;transition-delay:.1s"><span>EM OV TLS CA</span><b>G3B</b><span class="ty">WEBSITES</span></div>
+    <div class="im up" data-at="1" data-st="3:bad" style="left:528px;transition-delay:.15s"><span>EM OV TLS CA</span><b>G3C</b><span class="ty">WEBSITES</span></div>
+    <div class="im up" data-at="1" data-st="3:bad" style="left:704px;transition-delay:.2s"><span>EM EV TLS CA</span><b>G3B</b><span class="ty">WEBSITES</span></div>
+    <div class="im up" data-at="1" data-st="3:bad" style="left:880px;transition-delay:.25s"><span>EM EV TLS CA</span><b>G3C</b><span class="ty">WEBSITES</span></div>
+    <div class="im up" data-at="1" data-st="3:bad" style="left:1056px;transition-delay:.3s"><span>EM OV CS CA</span><b>G3B</b><span class="ty">CODE SIGNING</span></div>
+    <div class="im up" data-at="1" data-st="3:bad" style="left:1232px;transition-delay:.35s;width:148px"><span>EM OV CS CA</span><b>G3C</b><span class="ty">CODE SIGNING</span></div>
+    <div class="facts2">
+      <div class="up" data-at="3"><b>DV / OV / EV</b> = the three website validation levels. <b>CS</b> = code signing, for software.</div>
+      <div class="up" data-at="3" style="transition-delay:.12s"><b>G3B</b> = eMudhra BV (Netherlands). <b>G3C</b> = eMudhra Inc (US). Per eMudhra, one was live in production.</div>
+      <div class="up" data-at="3" style="transition-delay:.24s"><b>Same keys, two paths.</b> Chrome and Firefox no longer trusted the Sectigo root for websites, but many other systems still did.</div>
+    </div>
+  </div>
+  <div class="cap"><p class="up" data-at="2" data-out="3">Each intermediate also had a twin certificate, cross-signed in May 2025 by Sectigo's older "AAA Certificate Services" root. Same key.</p></div>
+</section>
+
+<!-- ============ MASTER KEY ============ -->
+<section class="slide" id="s-master">
+  <aside class="notes">There were no name limits on these intermediates. A key under a trusted root can sign for any name. So the number 4 was a master key for every website on earth, for any client that trusted the chain.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>Why one small CA's key is a master key</h2>
+  <div class="scene">
+    <div class="tiles">
+      <div class="tile up" data-at="1" data-st="2:pwn"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>google.com</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.06s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>sbi.co.in</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.12s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>hdfcbank.com</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.18s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>irctc.co.in</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.24s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>incometax.gov.in</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.3s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>github.com</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.36s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>amazon.in</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.42s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>outlook.com</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.48s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>your-bank.com</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.54s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>vpn.your-company</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.6s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>api.payments</div>
+      <div class="tile up" data-at="1" data-st="2:pwn" style="transition-delay:.66s"><svg class="ico c"><use href="#i-lock"/></svg><svg class="ico o"><use href="#i-lock-open"/></svg>app updates</div>
+    </div>
+    <div class="key4 zoom" data-at="2"><svg class="ico"><use href="#i-key"/></svg>k = 4</div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">None of these sites ever used eMudhra.</p>
+    <p class="bad up" data-at="2">It does not matter. These intermediates had no name limits, so one key could sign a certificate for any of them.</p>
+  </div>
+</section>
+
+<!-- ============ ATTACK ============ -->
+<section class="slide" id="s-atk" data-steps="7">
+  <aside class="notes">A step-by-step attack. Compute the key, forge a certificate, get on the network path, answer as the bank, pass every check, relay to the real bank. The victim sees the real account and a padlock.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>An attack, step by step</h2>
+  <div class="scene">
+    <div class="list">
+      <div data-st="1:cur;2:done"><b>1 · Find the key</b>Try 255 numbers. Found: 4.</div>
+      <div data-st="2:cur;3:done"><b>2 · Forge a certificate</b>For www.bank.com, with the attacker's own key, signed with "4".</div>
+      <div data-st="3:cur;4:done"><b>3 · Get in the middle</b>Fake Wi-Fi, hacked router, DNS trick, or a bad network.</div>
+      <div data-st="4:cur;5:done"><b>4 · Victim opens bank.com</b>The ClientHello reaches the attacker.</div>
+      <div data-st="5:cur;6:done"><b>5 · Answer as "bank.com"</b>Send the forged chain and sign CertificateVerify.</div>
+      <div data-st="6:cur;7:done"><b>6 · Every check passes</b>Chain ✓ name ✓ signature ✓. Padlock shows.</div>
+      <div data-st="7:cur"><b>7 · Relay and read</b>Pass traffic to the real bank. Read and change it on the way.</div>
+    </div>
+    <div class="stg">
+      <svg class="over"><line class="wire" x1="130" y1="60" x2="345" y2="60"/><line class="wire" x1="475" y1="60" x2="675" y2="60"/></svg>
+      <div class="actor you" style="left:-15px;top:10px;width:150px"><svg class="ico"><use href="#i-browser"/></svg><span class="nm">You</span></div>
+      <div class="actor mal" style="left:330px;top:10px;width:150px"><svg class="ico"><use href="#i-hacker"/></svg><span class="nm">Attacker</span></div>
+      <div class="actor bank" style="left:660px;top:10px;width:150px"><svg class="ico"><use href="#i-server"/></svg><span class="nm">real bank</span></div>
+      <div class="chip priv pop" data-at="1" style="position:absolute;left:316px;top:126px"><svg class="ico"><use href="#i-key"/></svg>k = 4 · 0.01 s</div>
+      <div class="cert sm bad" data-at="2" data-pos="0:300,190;5:0,190" style="width:300px"><div class="ch"><span class="c-bad">Forged</span><svg class="ico" style="color:var(--bad)"><use href="#i-seal"/></svg></div><div class="row"><span>Name</span><span>www.bank.com</span></div><div class="row"><span>Key</span><span class="c-bad">attacker's</span></div><div class="row"><span>Issuer</span><span class="c-ca">EM DV TLS CA - G3C</span></div><div class="row"><span>Signed</span><span class="c-priv">with key 4</span></div></div>
+      <div class="up" data-at="3" data-out="5" style="position:absolute;left:360px;top:360px;display:flex;flex-direction:column;gap:10px;align-items:flex-start"><span class="chip bad"><svg class="ico"><use href="#i-wifi"/></svg>"Free_Airport_WiFi"</span><span class="chip bad"><svg class="ico"><use href="#i-router"/></svg>hacked home router</span><span class="chip bad"><svg class="ico"><use href="#i-book"/></svg>poisoned DNS answer</span></div>
+      <div class="chip pub" data-at="4" data-out="6" data-pos="3:110,-50;4:200,-50" style="font-size:15px">ClientHello → "bank.com"</div>
+      <div class="up" data-at="6" style="position:absolute;left:0;top:400px;display:flex;flex-direction:column;gap:8px">
+        <span class="chk"><span class="badge ok">✓</span>chain → trusted root</span><span class="chk"><span class="badge ok">✓</span>name = www.bank.com</span><span class="chk"><span class="badge ok">✓</span>CertificateVerify valid</span>
+      </div>
+      <div class="pop" data-at="6" style="position:absolute;left:250px;top:410px;color:var(--ok);font:600 18px var(--f-body);display:flex;gap:8px;align-items:center"><svg class="ico" style="font-size:52px"><use href="#i-lock"/></svg>"secure"</div>
+      <div class="chip ok pop" data-at="7" style="position:absolute;left:500px;top:-50px;font-size:15px">real TLS to bank</div>
+      <div class="speech bad pop" data-at="7" style="left:440px;top:400px;max-width:360px">Got the password and the OTP. The victim saw their real account.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONSEQUENCES ============ -->
+<section class="slide" id="s-cons">
+  <aside class="notes">What an attacker could have done. The scariest is the silent one: machine-to-machine traffic, where no human ever sees a warning. And devices that never update keep trusting these keys for years.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>What could an attacker have done?</h2>
+  <div class="scene">
+    <div class="fall-tiles">
+      <div class="t up" data-at="1"><svg class="ico"><use href="#i-key"/></svg><h3>Steal logins</h3><p>Passwords, OTPs and session cookies, behind a normal-looking padlock.</p></div>
+      <div class="t up" data-at="2"><svg class="ico"><use href="#i-swap"/></svg><h3>Change data in flight</h3><p>Swap a bank account number in a payment, or edit a download.</p></div>
+      <div class="t up" data-at="3"><svg class="ico"><use href="#i-server"/></svg><h3>Spy on machines</h3><p>Server-to-server and app-to-API traffic, where no human ever sees a warning.</p></div>
+      <div class="t up" data-at="4"><svg class="ico"><use href="#i-pkg"/></svg><h3>Sign fake software</h3><p>The two code-signing keys could make malware look like it came from a real publisher.</p></div>
+      <div class="t up" data-at="5"><svg class="ico"><use href="#i-mail"/></svg><h3>Pose as mail or VPN</h3><p>Any service that trusts these roots for TLS: email, VPNs, internal tools.</p></div>
+      <div class="t up" data-at="6"><svg class="ico"><use href="#i-chip"/></svg><h3>Haunt old devices</h3><p>Phones, TVs, routers and IoT gear that never update keep trusting these keys for years.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CT ============ -->
+<section class="slide" id="s-ct">
+  <aside class="notes">The safety net. Certificate Transparency: public, append-only logs. Major browsers reject a certificate that is not logged. A forged certificate must either be logged, where the world can see it, or be rejected. Nothing was found in the logs, so browsers were very likely safe. Other software usually does not check logs.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>The safety net: Certificate Transparency</h2>
+  <div class="scene">
+    <div class="panel log up" data-at="1">
+      <div class="hd"><svg class="ico" style="font-size:22px"><use href="#i-book"/></svg>Public CT log · append-only</div>
+      <div class="rows" aria-hidden="true">
+        <div><span>www.bank.com</span><span>R11</span></div><div><span>mail.example.org</span><span>GTS WR3</span></div><div><span>shop.example.in</span><span>E7</span></div><div><span>api.example.net</span><span>DigiCert G2</span></div><div><span>login.example.com</span><span>R10</span></div><div><span>cdn.example.io</span><span>Sectigo DV</span></div><div><span>portal.example.gov</span><span>HARICA</span></div><div><span>blog.example.dev</span><span>E8</span></div><div><span>pay.example.co</span><span>GTS WE1</span></div><div><span>docs.example.app</span><span>R11</span></div>
+        <div><span>www.bank.com</span><span>R11</span></div><div><span>mail.example.org</span><span>GTS WR3</span></div><div><span>shop.example.in</span><span>E7</span></div><div><span>api.example.net</span><span>DigiCert G2</span></div><div><span>login.example.com</span><span>R10</span></div><div><span>cdn.example.io</span><span>Sectigo DV</span></div><div><span>portal.example.gov</span><span>HARICA</span></div><div><span>blog.example.dev</span><span>E8</span></div><div><span>pay.example.co</span><span>GTS WE1</span></div><div><span>docs.example.app</span><span>R11</span></div>
+      </div>
+    </div>
+    <div class="br up" data-at="2" style="top:0"><h3>The rule</h3>Every new website certificate must be written into public logs. The log gives a receipt, which goes inside the certificate. <b>Chrome, Safari, Edge and Firefox reject certificates without receipts.</b></div>
+    <div class="br up" data-at="3" style="top:175px;right:auto;width:410px;box-sizing:border-box;border-color:var(--ok)"><h3 class="c-ok">Forged and logged?</h3>Everyone can see it. Monitors would flag a bank.com certificate from an eMudhra CA within hours.</div>
+    <div class="br up" data-at="3" style="top:175px;left:970px;border-color:var(--ok);transition-delay:.2s"><h3 class="c-ok">Forged, not logged?</h3>The browser refuses it. The attack fails.</div>
+    <div class="br up" data-at="4" style="top:330px;border-color:var(--ok)">Logs show <b>no certificates</b> from these eight intermediates in the whole 18 months. <b class="c-ok">Browsers were very likely never attacked.</b></div>
+    <div class="br up" data-at="5" style="top:440px;border-color:var(--bad);background:var(--bad-a)"><b class="c-bad">But</b> curl, Python, Java, Go programs, many phone apps and IoT devices <b>do not check CT logs</b>. For them, nobody can be sure.</div>
+  </div>
+</section>
+
+<!-- ============ 18 MONTHS ============ -->
+<section class="slide" id="s-gap">
+  <aside class="notes">The keys were effectively public from day one, for about seventeen and a half months. There was a public clue: revocation lists signed by these CAs began failing checks in May 2025.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>Hidden in plain sight for 17½ months</h2>
+  <div class="scene" id="gap-scene">
+    <div class="axis"></div><span class="tick" style="left:102px">May 2025</span><span class="tick" style="left:306px">Aug</span><span class="tick" style="left:510px">Nov</span><span class="tick" style="left:714px">Feb 2026</span><span class="tick" style="left:918px">May</span><span class="tick" style="left:1122px">Aug</span><span class="tick" style="left:1258px">Oct</span>
+    <div class="band" data-at="4"></div>
+    <span class="pin up" data-at="1" style="left:100px;top:252px;height:58px;background:var(--priv)"></span>
+    <div class="ev up" data-at="1" style="left:0;top:310px;width:190px;border-color:var(--priv)"><b>30 Apr 2025</b>Weak keys created at the key ceremony</div>
+    <span class="pin up" data-at="2" style="left:125px;top:140px;height:96px"></span>
+    <div class="ev up" data-at="2" style="left:0;top:0;width:300px"><b>May 2025</b>Sectigo cross-signs the eight. Revocation lists signed by these CAs start failing checks: the first public clue.</div>
+    <span class="pin up" data-at="3" style="left:238px;top:252px;height:58px"></span>
+    <div class="ev up" data-at="3" style="left:210px;top:310px"><b>Mid-2025 →</b>Trusted in browser root stores</div>
+    <span class="pin up" data-at="3" style="left:900px;top:120px;height:116px"></span>
+    <div class="ev up" data-at="3" style="left:760px;top:0;width:280px"><b>2025 – 2026</b>Two yearly audit cycles pass</div>
+    <span class="pin up" data-at="5" style="left:1291px;top:120px;height:116px;background:var(--bad)"></span>
+    <div class="ev up" data-at="5" style="left:1110px;top:0;width:270px;border-color:var(--bad)"><b class="c-bad">17 Oct 2026</b>Someone finally checks the keys</div>
+  </div>
+  <div class="cap"><p class="bad up" data-at="4">For about 17½ months, anyone who looked could have computed these keys.</p></div>
+</section>
+
+<!-- ============ DISCOVERY ============ -->
+<section class="slide" id="s-find">
+  <aside class="notes">How it came to light. A researcher, credited only as Wayne, was testing keys from the CCADB, the shared database root programs use to track CA certificates. He proved the break without revealing the keys by signing a message with each of them.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>17 October 2026: someone looked</h2>
+  <div class="scene">
+    <div class="left">
+      <div class="up" data-at="1">A researcher, credited as <b>"Wayne"</b>, was testing CA keys from the <b>CCADB</b>, the shared database root programs use to track every CA certificate.</div>
+      <div class="up" data-at="2">At 16:27 UTC the elliptic-curve keys broke. To prove it without publishing the keys, he <b class="c-priv">signed a message with each one</b>.</div>
+      <div class="up" data-at="4">Mozilla recovered the keys itself within two hours. Others did too. Per the Mozilla bug, AI agents managed it with a simple prompt.</div>
+      <div class="up" data-at="5">Mozilla's Dennis Jackson later published the proof, test sites and a patch list at <span class="mono c-pub">emudhra.we-have-a-problem.com</span>.</div>
+    </div>
+    <div class="msgc up" data-at="2">
+      <div class="label" style="color:#5a6584">Message</div>
+      <div class="m">"We have a problem here - Wayne"</div>
+      <div class="sigs">
+        <div class="pop" data-at="3"><svg class="ico"><use href="#i-seal"/></svg>DV G3B</div><div class="pop" data-at="3" style="transition-delay:.1s"><svg class="ico"><use href="#i-seal"/></svg>DV G3C</div><div class="pop" data-at="3" style="transition-delay:.2s"><svg class="ico"><use href="#i-seal"/></svg>OV G3B</div><div class="pop" data-at="3" style="transition-delay:.3s"><svg class="ico"><use href="#i-seal"/></svg>OV G3C</div>
+        <div class="pop" data-at="3" style="transition-delay:.4s"><svg class="ico"><use href="#i-seal"/></svg>EV G3B</div><div class="pop" data-at="3" style="transition-delay:.5s"><svg class="ico"><use href="#i-seal"/></svg>EV G3C</div><div class="pop" data-at="3" style="transition-delay:.6s"><svg class="ico"><use href="#i-seal"/></svg>CS G3B</div><div class="pop" data-at="3" style="transition-delay:.7s"><svg class="ico"><use href="#i-seal"/></svg>CS G3C</div>
+      </div>
+      <p class="up" data-at="3" style="font-size:18px;line-height:1.45;margin-top:16px;color:#3b4565">Anyone can check these 8 signatures with the public keys in the certificates. Only the private-key holder could have made them.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOUR DAYS ============ -->
+<section class="slide" id="s-days">
+  <aside class="notes">Timeline in UTC. Chrome had a block live 1 hour 40 minutes after the report. Firefox within 5 hours. Then Apple, Android, Microsoft, and the open-source world.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4 · times in UTC</div>
+  <h2>Four days in October</h2>
+  <div class="scene">
+    <div class="cols">
+      <div class="col up" data-at="1"><h3>Sat 17 Oct<small>discovery</small></h3>
+        <div class="ev"><b>16:27</b>Researcher breaks the keys</div>
+        <div class="ev"><b>18:05</b>Report to Apple, Chrome, Microsoft, Mozilla, eMudhra</div>
+        <div class="ev k"><b>19:45</b>Chrome blocks the 6 website intermediates (CRLSet)</div>
+        <div class="ev"><b>21:28</b>eMudhra replies; disables its one live intermediate</div>
+        <div class="ev"><b>21:48</b>Mozilla recovers the keys itself</div>
+        <div class="ev k"><b>22:59</b>Firefox block complete (OneCRL)</div></div>
+      <div class="col up" data-at="2"><h3>Sun 18 Oct<small>revocation</small></h3>
+        <div class="ev k"><b>09:24–09:38</b>eMudhra revokes all 8 intermediates as "CA compromise"</div>
+        <div class="ev"><b>12:06</b>Mozilla incident bug opened</div></div>
+      <div class="col up" data-at="3"><h3>Mon 19 Oct<small>quiet fixes</small></h3>
+        <div class="ev k"><b>Apple</b>blocks the certificates</div>
+        <div class="ev k"><b>≈ 22:00</b>Android block via Google Play services</div>
+        <div class="ev"><b>Private</b>Other trust stores and Cloudflare warned</div></div>
+      <div class="col up" data-at="4"><h3>Tue 20 Oct<small>public</small></h3>
+        <div class="ev"><b>Disclosure</b>Mozilla goes public</div>
+        <div class="ev k"><b>Microsoft</b>blocks via Windows updates</div>
+        <div class="ev k"><b>Firefox</b>158.0.1 · NSS 3.131.1 drops the G3 root</div>
+        <div class="ev k"><b>Go</b>1.27.3 / 1.26.10 · Linux distros update</div>
+        <div class="ev"><b>eMudhra</b>publishes a statement</div></div>
+      <div class="col up" data-at="5"><h3>Wed 21 Oct<small>fallout</small></h3>
+        <div class="ev k"><b>Node.js</b>fixes released</div>
+        <div class="ev"><b>CERT-In</b>advisory CIAD-2026-0050</div>
+        <div class="ev"><b>MeitY</b>forms an investigation team</div>
+        <div class="ev c-bad"><b>Markets</b>eMudhra shares fall ≈ 20%</div></div>
+      <div class="col fut up" data-at="6"><h3>27 Oct<small>expected</small></h3>
+        <div class="ev"><b>Chrome</b>Root Store v43 removes emSign ECC Root CA - G3</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FALLOUT ============ -->
+<section class="slide" id="s-fall">
+  <aside class="notes">The cost to eMudhra and its customers. Note: eMudhra and India's IT ministry say Indian digital signature and eSign services are separate and unaffected.</aside>
+  <div class="eyebrow"><span class="n">4</span> The key was 4</div>
+  <h2>The cost</h2>
+  <div class="scene">
+    <div class="stat-tiles">
+      <div class="t up" data-at="1"><div class="n">8 + 8</div><p>intermediates revoked: eMudhra's own, plus Sectigo's cross-signed twins.</p></div>
+      <div class="t up" data-at="1" style="transition-delay:.12s"><div class="n">1 root</div><p>emSign ECC Root CA - G3 removed by Mozilla, with Chrome to follow.</p></div>
+      <div class="t up" data-at="2"><div class="n">≈ 30,000</div><p>customer certificates under that root must be replaced.</p><small>eMudhra estimate</small></div>
+      <div class="t up" data-at="2" style="transition-delay:.12s"><div class="n">≈ −20%</div><p>eMudhra share price on 21 Oct.</p></div>
+      <div class="t up" data-at="3"><div class="n">2</div><p>Indian government responses: a CERT-In advisory and a MeitY investigation team.</p></div>
+      <div class="t up" data-at="3" style="transition-delay:.12s"><div class="n c-mute" style="color:var(--mute)">Under review</div><p>Google is also evaluating eMudhra's other root, emSign Root CA - G1.</p></div>
+    </div>
+  </div>
+  <div class="cap"><p class="up" data-at="4">eMudhra and India's IT ministry say Indian digital-signature and eSign services are separate and were not affected.</p></div>
+</section>
+<style>
+#s-rev .bubble{font:500 17px var(--f-mono)}
+.vend{position:absolute;left:0;right:0;top:0;display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.vend .v{padding:22px 22px;border-radius:12px;background:var(--ink2);border:1px solid var(--line);min-height:250px;display:flex;flex-direction:column;gap:10px}
+.vend .v h3{font-size:28px}
+.vend .v .mech{font:600 17px var(--f-mono);color:var(--ok)}
+.vend .v p{font-size:18px;line-height:1.45;color:var(--mute)}
+.vend .v .when{margin-top:auto;font:600 16px var(--f-mono);color:var(--priv)}
+.roots-row{position:absolute;left:0;right:0;top:300px;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.roots-row > div{padding:18px 22px;border-radius:12px;border:1px solid var(--bad);background:var(--bad-a);font-size:20px;line-height:1.45}
+
+#s-tail .hub{position:absolute;z-index:1;left:0;top:0;width:330px;padding:22px 22px;border-radius:14px;border:2px solid var(--ca);background:var(--ink3);font-size:20px;line-height:1.4}
+#s-tail .hub h3{font-size:26px;margin-bottom:8px}
+#s-tail .scene{overflow:hidden}
+#s-tail .ring{position:absolute;left:150px;top:80px;width:40px;height:40px;border-radius:50%;border:2px solid var(--ca);opacity:0}
+#s-tail.active .ring{animation:ripple 3s ease-out infinite}
+#s-tail.active .ring.r2{animation-delay:1s} #s-tail.active .ring.r3{animation-delay:2s}
+@keyframes ripple{0%{transform:scale(1);opacity:.7}100%{transform:scale(18);opacity:0}}
+#s-tail .pk{position:absolute;left:390px;right:0;top:0;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+#s-tail .pk div{padding:12px 14px;border-radius:10px;background:var(--ink2);border:1px solid var(--ok);font-size:17px;line-height:1.3}
+#s-tail .pk div b{display:block;font:600 14px var(--f-mono);color:var(--ok);margin-top:3px}
+#s-tail .pk div.bad{border-color:var(--bad);background:var(--bad-a)} #s-tail .pk div.bad b{color:var(--bad)}
+#s-tail .pk div.wait{border-color:var(--priv)} #s-tail .pk div.wait b{color:var(--priv)}
+#s-tail .q{position:absolute;left:0;top:300px;width:330px;font-size:18px;line-height:1.45;color:var(--mute)}
+
+#s-test .term{position:absolute;left:0;top:0;width:900px;height:420px;border-radius:14px;background:#060912;border:1px solid var(--line2);overflow:hidden}
+#s-test .term .tb{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line)}
+#s-test .term .tb i{width:12px;height:12px;border-radius:50%;background:var(--line2)}
+#s-test .term pre{margin:0;padding:18px 22px;font:500 19px/1.6 var(--f-mono);white-space:pre-wrap;word-break:break-all;color:var(--paper)}
+#s-test .term .pr{color:var(--ok)}
+#s-test .side{position:absolute;left:950px;right:0;top:0;display:flex;flex-direction:column;gap:16px}
+#s-test .side > div{font-size:20px;line-height:1.45;padding:16px 18px;border-radius:12px;background:var(--ink2);border:1px solid var(--line)}
+#s-test .caret{display:inline-block;width:.6em;height:1.1em;background:var(--paper);vertical-align:-.15em;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+
+.todo{position:absolute;left:0;right:0;top:0;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.todo .c{padding:24px 24px;border-radius:12px;background:var(--ink2);border:1px solid var(--line)}
+.todo .c h3{font-size:28px;display:flex;gap:12px;align-items:center}
+.todo .c h3 .ico{font-size:38px}
+.todo ul{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:12px}
+.todo li{font-size:19px;line-height:1.4;display:flex;gap:10px}
+.todo li::before{content:"";flex:none;width:16px;height:16px;margin-top:4px;border:2px solid var(--ok);border-radius:4px}
+.todo li.no::before{border-color:var(--bad);background:var(--bad-a)}
+.todo code{font:500 16px var(--f-mono);color:var(--bad)}
+
+.lessons{display:flex;flex-direction:column;gap:14px;margin-top:34px;max-width:1300px}
+.lessons > div{display:grid;grid-template-columns:70px 1fr;align-items:baseline;font-size:27px;line-height:1.35;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.lessons .k{font:700 40px/1 var(--f-display);color:var(--priv)}
+.lessons span.d{display:block;font-size:20px;color:var(--mute);margin-top:4px}
+
+#s-end{padding:0}
+#s-end canvas.guilloche{position:absolute;right:-200px;top:-180px;width:1260px;height:1260px;opacity:.4}
+#s-end .w{position:absolute;left:110px;top:130px;width:1100px}
+#s-end .big{font:800 96px/1 var(--f-display);letter-spacing:-.02em;margin-top:30px}
+#s-end .big .c-priv{font-size:1.3em;line-height:.8}
+#s-end .lead{margin-top:34px}
+
+#s-src .src{columns:2;column-gap:60px;margin-top:34px;font-size:21px;line-height:1.45}
+#s-src .src a{display:block;break-inside:avoid;margin-bottom:22px;color:var(--paper);text-decoration:none;pointer-events:auto;border-left:2px solid var(--line2);padding-left:14px}
+#s-src .src a span{display:block;font:500 15px var(--f-mono);color:var(--pub);margin-top:2px;word-break:break-all}
+#s-src .src a:hover,#s-src .src a:focus-visible{border-color:var(--pub);outline:none}
+</style>
+
+<!-- ============ CH 5 ============ -->
+<section class="slide chapter" id="s-ch5" data-steps="0">
+  <canvas class="guilloche" data-color="62,220,142" data-seed="9"></canvas>
+  <div class="num">5</div>
+  <h2>The cleanup</h2>
+  <p class="lead">How do you un-trust a key that is already inside billions of devices?</p>
+</section>
+
+<!-- ============ REVOCATION ============ -->
+<section class="slide" id="s-rev">
+  <aside class="notes">Classic revocation: the CA publishes a cancelled list (CRL) or answers live questions (OCSP). The weakness: if the answer does not come, most software carries on. An attacker in the middle can block the question. And many apps never ask.</aside>
+  <div class="eyebrow"><span class="n">5</span> The cleanup</div>
+  <h2>Plan A: tell everyone "this certificate is cancelled"</h2>
+  <div class="scene">
+    <svg class="over"><line class="wire" x1="170" y1="108" x2="610" y2="108"/><line class="wire" x1="770" y1="108" x2="1220" y2="108"/></svg>
+    <div class="actor you" style="left:0;top:60px"><svg class="ico"><use href="#i-browser"/></svg><span class="nm">Your app</span></div>
+    <div class="actor mal pop" data-at="3" style="left:610px;top:60px"><svg class="ico"><use href="#i-hacker"/></svg><span class="nm">Attacker</span></div>
+    <div class="actor ca" style="left:1220px;top:60px"><svg class="ico"><use href="#i-ca"/></svg><span class="nm">eMudhra CA</span></div>
+    <div class="chip ca up" data-at="1" style="position:absolute;left:830px;top:260px"><svg class="ico"><use href="#i-doc"/></svg>CRL: list of cancelled certificates</div>
+    <div class="chip pub" data-at="2" data-out="3" data-pos="1:190,20;2:960,20">OCSP: "Is this one cancelled?"</div>
+    <div class="chip pub" data-at="3" data-pos="2:190,20;3:430,20">OCSP: "Is this one cancelled?"</div>
+    <div class="chip bad pop" data-at="3" style="position:absolute;left:520px;top:200px"><svg class="ico"><use href="#i-x"/></svg>question blocked</div>
+    <div class="speech bad pop" data-at="4" style="left:30px;top:250px;max-width:330px">No answer… I'll just trust it.</div>
+  </div>
+  <div class="cap">
+    <p class="up" data-at="1" data-out="2">eMudhra revoked the eight intermediates and listed them in its cancelled list (CRL).</p>
+    <p class="up" data-at="2" data-out="3">Software can also ask the CA live (OCSP): "is this certificate still good?"</p>
+    <p class="bad up" data-at="3" data-out="4">But an attacker in the middle can simply block the question.</p>
+    <p class="bad up" data-at="4" data-out="5">Most software "fails open": no answer means carry on. And many apps never ask at all.</p>
+    <p class="ok up" data-at="5">So browser makers built their own block lists, pushed straight into the browser.</p>
+  </div>
+</section>
+
+<!-- ============ BROWSERS ============ -->
+<section class="slide" id="s-fix">
+  <aside class="notes">Each browser has a push channel for emergencies. Chrome's CRLSets were live in under two hours. Firefox's OneCRL the same evening. Apple and Microsoft within three days. Then the root itself was removed.</aside>
+  <div class="eyebrow"><span class="n">5</span> The cleanup</div>
+  <h2>Plan B: browsers push their own block lists</h2>
+  <div class="scene">
+    <div class="vend">
+      <div class="v up" data-at="1"><h3>Chrome</h3><div class="mech">CRLSets</div><p>A small block list Google pushes to every Chrome in the background. Android got a block via Google Play services.</p><div class="when">17 Oct 19:45 · 1 h 40 m after report</div></div>
+      <div class="v up" data-at="2"><h3>Firefox</h3><div class="mech">OneCRL + CRLite</div><p>OneCRL blocks CA certificates. CRLite packs every revoked certificate into a tiny file.</p><div class="when">17 Oct 22:59</div></div>
+      <div class="v up" data-at="3"><h3>Apple</h3><div class="mech">trust update</div><p>Blocks for iPhone, iPad, Mac and Safari.</p><div class="when">19 Oct</div></div>
+      <div class="v up" data-at="4"><h3>Microsoft</h3><div class="mech">Disallowed list</div><p>Windows "untrusted" list, delivered through automatic trust-list updates.</p><div class="when">20 Oct</div></div>
+    </div>
+    <div class="roots-row">
+      <div class="up" data-at="5"><b>Mozilla removes the root.</b> NSS 3.131.1 and Firefox 158.0.1 drop <span class="mono">emSign ECC Root CA - G3</span> (20 Oct).</div>
+      <div class="up" data-at="5" style="transition-delay:.15s"><b>Chrome follows.</b> Chrome Root Store v43 removes the same root, expected 27 Oct. Websites under it must switch CAs first.</div>
+    </div>
+  </div>
+  <div class="cap"><p class="ok up" data-at="5">Browsers: protected within hours to days, mostly without users doing anything.</p></div>
+</section>
+
+<!-- ============ LONG TAIL ============ -->
+<section class="slide" id="s-tail">
+  <aside class="notes">The hard part. Thousands of programs carry their own copy of the trusted list. Each needs its own update, and someone must install it. Go took the unusual step of hard-coding the eight keys as blocked, with no way to switch it off.</aside>
+  <div class="eyebrow"><span class="n">5</span> The cleanup</div>
+  <h2>The long tail: everything that carries its own list</h2>
+  <div class="scene">
+    <span class="ring"></span><span class="ring r2"></span><span class="ring r3"></span>
+    <div class="hub up" data-at="1"><h3>Mozilla's root list</h3>Copied into Linux, programming languages, containers, apps and devices. Each copy must be updated separately.</div>
+    <div class="pk">
+      <div class="pop" data-at="2"><span>Ubuntu, Debian, Fedora, Arch, Alpine…</span><b>ca-certificates</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.06s"><span>NSS</span><b>3.131.1</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.12s"><span>curl CA bundle</span><b>2026-10-20</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.18s"><span>Python certifi</span><b>2026.10.19</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.24s"><span>pip</span><b>26.2.2</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.3s"><span>Go</span><b>1.27.3 · 1.26.10</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.36s"><span>Node.js</span><b>21 Oct release</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.42s"><span>Java</span><b>several versions</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.48s"><span>Rustup</span><b>1.29.2</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.54s"><span>Deno</span><b>2.9.8</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.6s"><span>Claude Code</span><b>2.1.303</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.66s"><span>Cloudflare cloudflared</span><b>2026.10.2</b></div>
+      <div class="pop" data-at="2" style="transition-delay:.72s"><span>Electron, uv, Composer, Perl…</span><b>patched</b></div>
+      <div class="pop wait" data-at="2" style="transition-delay:.78s"><span>Bun, Erlang certifi</span><b>pending (at disclosure)</b></div>
+      <div class="pop bad" data-at="3"><span>macOS built-in curl, git, Python</span><b>/etc/ssl/cert.pem outdated</b></div>
+      <div class="pop bad" data-at="3" style="transition-delay:.1s"><span>Old phones, TVs, IoT</span><b>may never update</b></div>
+    </div>
+    <div class="q up" data-at="4"><b style="color:var(--paper)">Go's unusual fix:</b> reject any chain containing one of the eight keys, hard-coded, with no opt-out. Its team argued Linux root lists are too poorly maintained for revocation to reach apps in time.</div>
+  </div>
+  <div class="cap"><p class="bad up" data-at="4">Browsers update themselves. Everything else waits for someone to ship, and someone else to install, an update.</p></div>
+</section>
+
+<!-- ============ TEST ============ -->
+<section class="slide" id="s-test" data-steps="3">
+  <aside class="notes">The incident site runs test servers that use the compromised chain. If your tool shows a certificate error, good: it no longer trusts the bad keys. If the page loads, your tool still trusts them. A browser passing does not mean your back-end services pass.</aside>
+  <div class="eyebrow"><span class="n">5</span> The cleanup</div>
+  <h2>Test your own tools</h2>
+  <div class="scene">
+    <div class="term"><div class="tb"><i></i><i></i><i></i></div><pre id="term-pre"></pre></div>
+    <div class="side">
+      <div class="up" data-at="1"><b>Test servers</b> on the incident site serve a certificate from the broken chain:<br><span class="mono c-pub" style="font-size:16px">dv-g3b-emudhra.we-have-a-problem.com<br>dv-g3b-aaa-emudhra.we-have-a-problem.com</span></div>
+      <div class="up" data-at="2" style="border-color:var(--ok)"><b class="c-ok">Error = good.</b> Your tool no longer trusts the broken keys.</div>
+      <div class="up" data-at="3" style="border-color:var(--bad)"><b class="c-bad">Page loads = bad.</b> Update it. A browser passing does not prove your servers, apps and scripts pass.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TODO ============ -->
+<section class="slide" id="s-todo">
+  <aside class="notes">What the audience should do on Monday morning.</aside>
+  <div class="eyebrow"><span class="n">5</span> The cleanup</div>
+  <h2>What should you do?</h2>
+  <div class="scene">
+    <div class="todo">
+      <div class="c up" data-at="1"><h3><svg class="ico c-pub"><use href="#i-phone"/></svg>Everyone</h3><ul><li>Update your browser and restart it.</li><li>Install phone and computer system updates.</li><li>Treat any certificate warning as a real warning.</li></ul></div>
+      <div class="c up" data-at="2"><h3><svg class="ico c-priv"><use href="#i-term"/></svg>Developers</h3><ul><li>Update runtimes and CA bundles: certifi, Node.js, Go, Java, Rust crates.</li><li>Rebuild and redeploy container images.</li><li>Check indirect dependencies too.</li><li class="no"><span>Never "fix" new errors with <code>verify=False</code>, <code>curl -k</code> or <code>InsecureSkipVerify</code>.</span></li></ul></div>
+      <div class="c up" data-at="3"><h3><svg class="ico c-ok"><use href="#i-server"/></svg>Site and IT teams</h3><ul><li>Certificates under emSign ECC Root CA - G3? Replace them before 27 Oct.</li><li>Update trust stores in proxies, mutual-TLS setups and appliances.</li><li>Watch CT logs for certificates issued for your own domains.</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ LESSONS ============ -->
+<section class="slide" id="s-learn">
+  <aside class="notes">Five lessons. The last is the hopeful one: the system's openness let a stranger find the flaw and let the whole ecosystem fix it in days.</aside>
+  <div class="eyebrow">Lessons</div>
+  <h2>Five things to take home</h2>
+  <div class="lessons">
+    <div class="up" data-at="1"><span class="k">1</span><span>Trust on the web is shared.<span class="d">Any one trusted CA can vouch for any website, so the weakest CA sets the level for everyone.</span></span></div>
+    <div class="up" data-at="2"><span class="k">2</span><span>A key is only as strong as the way it was chosen.<span class="d">P-384 is excellent maths. A private key of 4 makes it worthless.</span></span></div>
+    <div class="up" data-at="3"><span class="k">3</span><span>Certified hardware and audits are not proof.<span class="d">The process around them failed, and two audit cycles did not catch it.</span></span></div>
+    <div class="up" data-at="4"><span class="k">4</span><span>Openness works.<span class="d">Public certificates and public logs let one outsider find the flaw, and showed browsers were very likely never attacked.</span></span></div>
+    <div class="up" data-at="5"><span class="k">5</span><span>Trust lists must update fast.<span class="d">Browsers fixed it in hours. Everything else is still catching up.</span></span></div>
+  </div>
+</section>
+
+<!-- ============ END ============ -->
+<section class="slide" id="s-end" data-steps="0">
+  <aside class="notes">Close on the image they will remember.</aside>
+  <canvas class="guilloche" data-color="255,181,71" data-seed="11"></canvas>
+  <div class="w">
+    <div class="eyebrow"><span class="n">eMudhra</span> October 2026</div>
+    <p class="big">Every padlock rests on a secret number.<br>For 17½ months, one of them was <span class="c-priv">4</span>.</p>
+    <p class="lead">Thank you. Questions?</p>
+  </div>
+</section>
+
+<!-- ============ SOURCES ============ -->
+<section class="slide" id="s-src" data-steps="0">
+  <aside class="notes">All facts on these slides come from these sources. Times are UTC. eMudhra's root-cause account was still under investigation at the time of writing.</aside>
+  <div class="eyebrow">Sources</div>
+  <h2>Read more</h2>
+  <div class="src">
+    <a href="https://emudhra.we-have-a-problem.com/" target="_blank" rel="noopener">eMudhra Intermediate CA Compromise: proof, tests, patch list (Dennis Jackson and contributors)<span>emudhra.we-have-a-problem.com</span></a>
+    <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=2083449" target="_blank" rel="noopener">Mozilla Bugzilla 2083449: incident report and timeline<span>bugzilla.mozilla.org/show_bug.cgi?id=2083449</span></a>
+    <a href="https://blog.mozilla.org/security/2026/10/20/protecting-firefox-users-following-the-compromise-of-emudhra-intermediate-certificates/" target="_blank" rel="noopener">Mozilla Security Blog: Protecting Firefox users<span>blog.mozilla.org/security</span></a>
+    <a href="https://blog.cloudflare.com/emudhra-certificate-compromise/" target="_blank" rel="noopener">Cloudflare: 8 eMudhra certificates are compromised<span>blog.cloudflare.com/emudhra-certificate-compromise</span></a>
+    <a href="https://emudhra.com/en/post/certificate-security-incident" target="_blank" rel="noopener">eMudhra: Statement on recent certificate security incident<span>emudhra.com/en/post/certificate-security-incident</span></a>
+    <a href="https://thehackernews.com/2026/10/eight-emudhra-ca-keys-compromised.html" target="_blank" rel="noopener">The Hacker News: Eight eMudhra CA keys compromised<span>thehackernews.com</span></a>
+    <a href="https://www.theregister.com/security/2026/10/20/indian-certification-authority-emudhras-private-keys-compromised-one-of-them-was-the-number-4/5304312" target="_blank" rel="noopener">The Register: one of them was the number 4<span>theregister.com</span></a>
+    <a href="https://www.helpnetsecurity.com/2026/10/21/emudhra-certificates-private-keys-compromised/" target="_blank" rel="noopener">Help Net Security: eMudhra security blunder<span>helpnetsecurity.com</span></a>
+    <a href="https://socradar.io/blog/emudhra-ca-key-compromise-weak-keys-risks-and-fixes/" target="_blank" rel="noopener">SOCRadar: weak keys, risks and fixes<span>socradar.io</span></a>
+  </div>
+</section>
+<div id="hud"><span>The key was 4 · eMudhra, Oct 2026</span><span class="right"><span class="dots" id="hud-dots"></span><span id="hud-count"></span></span></div><div id="bar"></div>
+</div></div>
+<style>
+.slide .notes{display:none}
+.slide.instant,.slide.instant *{transition:none !important}
+</style>
+<div id="notes" hidden><div class="label">Speaker notes · N to hide</div><div id="notes-text"></div></div>
+<div id="help" hidden><div class="panel">
+  <h3 style="font-size:24px;margin-bottom:6px">Controls</h3>
+  <table>
+    <tr><td><kbd>→</kbd> <kbd>Space</kbd> <kbd>PgDn</kbd> or click</td><td>next step</td></tr>
+    <tr><td><kbd>←</kbd> <kbd>PgUp</kbd></td><td>previous step</td></tr>
+    <tr><td><kbd>↓</kbd> / <kbd>↑</kbd></td><td>next / previous slide</td></tr>
+    <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>first / last slide</td></tr>
+    <tr><td><kbd>F</kbd></td><td>full screen</td></tr>
+    <tr><td><kbd>N</kbd></td><td>speaker notes</td></tr>
+    <tr><td><kbd>?</kbd> / <kbd>Esc</kbd></td><td>show / hide this help</td></tr>
+  </table>
+</div></div>
+<div id="toast">→ or Space to advance · N notes · F full screen · ? help</div>
+<div id="navbtns"><button type="button" id="btn-prev" aria-label="Previous">‹</button><button type="button" id="btn-next" aria-label="Next">›</button></div>
+
+<script>
+(function(){
+"use strict";
+const stage=document.getElementById('stage');
+const viewport=document.getElementById('viewport');
+const slides=[...stage.querySelectorAll('.slide')];
+const hooks={};
+const timers=new Map();
+function later(key,fn,ms){const t=setTimeout(fn,ms);if(!timers.has(key))timers.set(key,[]);timers.get(key).push(t);return t}
+function clearTimers(key){(timers.get(key)||[]).forEach(clearTimeout);timers.set(key,[])}
+const NS='http://www.w3.org/2000/svg';
+function svgEl(tag,attrs){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);return e}
+
+/* ---------------- guilloche (security-print rosettes) ---------------- */
+function guilloche(c){
+  const W=parseInt(getComputedStyle(c).width)||900;
+  c.width=W;c.height=W;
+  const ctx=c.getContext('2d');const col=c.dataset.color||'183,156,255';const seed=+c.dataset.seed||1;
+  ctx.translate(W/2,W/2);ctx.lineWidth=1;
+  const bands=[
+    {R:.43,A:.032,B:.010,n:16+seed%5,n2:48,m:16,a:.30},
+    {R:.33,A:.028,B:.009,n:12+seed%3,n2:36,m:14,a:.24},
+    {R:.22,A:.024,B:.008,n:9+seed%4,n2:27,m:12,a:.20},
+    {R:.12,A:.020,B:.006,n:6+seed%2,n2:18,m:10,a:.16}];
+  for(const b of bands){
+    ctx.strokeStyle=`rgba(${col},${b.a})`;
+    for(let j=0;j<b.m;j++){
+      ctx.beginPath();const ph=j*2*Math.PI/b.m;
+      for(let i=0;i<=900;i++){const th=i/900*2*Math.PI;
+        const r=W*(b.R+b.A*Math.sin(b.n*th+ph)+b.B*Math.sin(b.n2*th-ph*2));
+        const x=r*Math.cos(th),y=r*Math.sin(th);i?ctx.lineTo(x,y):ctx.moveTo(x,y)}
+      ctx.stroke()}
+  }
+}
+document.querySelectorAll('canvas.guilloche').forEach(guilloche);
+
+/* ---------------- builders that create step elements ---------------- */
+// toy ring
+const RING={cx:300,cy:300,r:230,p:31,g:3};
+function ringPos(v){const a=(v-1)/30*2*Math.PI-Math.PI/2;return[RING.cx+RING.r*Math.cos(a),RING.cy+RING.r*Math.sin(a)]}
+(function(){
+  const svg=document.getElementById('ring-svg');if(!svg)return;
+  svg.appendChild(svgEl('circle',{cx:300,cy:300,r:230,fill:'none',stroke:'#2A3658','stroke-width':1.5}));
+  svg.appendChild(svgEl('g',{id:'ring-jumps'}));
+  for(let v=1;v<=30;v++){const[x,y]=ringPos(v);
+    const lx=300+(RING.r+30)*Math.cos((v-1)/30*2*Math.PI-Math.PI/2),ly=300+(RING.r+30)*Math.sin((v-1)/30*2*Math.PI-Math.PI/2);
+    svg.appendChild(svgEl('circle',{cx:x,cy:y,r:9,class:'rdot',id:'rd'+v}));
+    const t=svgEl('text',{x:lx,y:ly,class:'rlbl',id:'rl'+v});t.textContent=v;svg.appendChild(t)}
+})();
+// weakest-link mesh
+(function(){
+  const sc=document.getElementById('weak-scene');if(!sc)return;
+  const cas=["Let's Encrypt","DigiCert","Sectigo","GlobalSign","Google TS","Amazon","HARICA","emSign"];
+  const sites=["google.com","sbi.co.in","github.com","irctc.co.in","your-bank.com","gov.in"];
+  const cx=i=>95+i*170, sx=j=>140+j*220;
+  const svg=svgEl('svg',{class:'over'});sc.appendChild(svg);
+  cas.forEach((n,i)=>sites.forEach((m,j)=>{
+    const first=(i===4&&j===0);
+    const l=svgEl('line',{x1:cx(i),y1:86,x2:sx(j),y2:322,pathLength:1,class:'lk draw','data-at':first?1:2});
+    if(i===7)l.setAttribute('data-st','3:bad');
+    if(first)l.style.stroke='var(--ca)';
+    svg.appendChild(l)}));
+  cas.forEach((n,i)=>{const d=document.createElement('div');d.className='node ca-n up';d.dataset.at=0;d.style.left=cx(i)+'px';d.style.top='0';
+    if(i===7)d.dataset.st='3:bad';
+    d.innerHTML='<svg class="ico"><use href="#i-ca"/></svg>'+n;sc.appendChild(d)});
+  sites.forEach((m,j)=>{const d=document.createElement('div');d.className='node site-n up';d.dataset.at=0;d.style.left=sx(j)+'px';d.style.top='330px';
+    d.innerHTML='<svg class="ico"><use href="#i-lock"/></svg>'+m;sc.appendChild(d)});
+})();
+// 24 ceremony keys
+(function(){
+  const box=document.getElementById('keys24');if(!box)return;const bad=[1,2,7,8,13,14,19,20];
+  for(let i=0;i<24;i++){const s=document.createElement('span');s.className='pop';s.dataset.at=3;s.style.transitionDelay=(i*0.035)+'s';
+    if(bad.includes(i))s.dataset.st='5:bad';s.innerHTML='<svg class="ico"><use href="#i-key"/></svg>';box.appendChild(s)}
+})();
+// eight intermediates: lines
+(function(){
+  const svg=document.getElementById('eight-lines');if(!svg)return;
+  const xs=[0,176,352,528,704,880,1056,1232].map((x,i)=>x+(i===7?74:78));
+  xs.forEach((x,i)=>{
+    svg.appendChild(svgEl('path',{d:`M460 64 C460 140 ${x} 130 ${x} 208`,class:'wire draw','data-at':1,pathLength:1,style:`stroke:var(--ca);opacity:.7;transition-delay:${i*0.05}s`}));
+    svg.appendChild(svgEl('path',{d:`M1020 64 C1020 150 ${x} 120 ${x} 208`,class:'wire draw','data-at':2,pathLength:1,style:`stroke:var(--mute);stroke-dasharray:1;opacity:.45;transition-delay:${i*0.05}s`}));
+  });
+})();
+// byte grid
+const GOODHEX='2e8b24e21a05e69b043c3f3571c390d50753810dfcb40633260838195b38424e8e9cbd4819879de9c46c65384df5ebb0';
+(function(){
+  const g=document.getElementById('bytes-grid');if(!g)return;
+  for(let i=0;i<48;i++){const s=document.createElement('span');s.textContent=GOODHEX.substr(i*2,2);g.appendChild(s)}
+})();
+// title digits
+const LONGKEY='27324745105062160777777349260269379510652796200558944916836847314423835404913747899415477564513305416868158069038732';
+
+/* ---------------- slide model ---------------- */
+function parseList(str){return str.split(';').filter(Boolean).map(p=>{const i=p.indexOf(':');return[+p.slice(0,i),p.slice(i+1)]}).sort((a,b)=>a[0]-b[0])}
+slides.forEach(s=>{
+  s._ats=[...s.querySelectorAll('[data-at]')];
+  s._outs=[...s.querySelectorAll('[data-out]')];
+  s._pos=[...s.querySelectorAll('[data-pos]')].map(el=>({el,list:parseList(el.dataset.pos).map(([k,v])=>[k,v.split(',').map(Number)])}));
+  s._st=[...s.querySelectorAll('[data-st]')].map(el=>({el,list:parseList(el.dataset.st)}));
+  let m=s.hasAttribute('data-steps')?+s.dataset.steps:0;
+  s._ats.forEach(e=>m=Math.max(m,+e.dataset.at));
+  s._outs.forEach(e=>m=Math.max(m,+e.dataset.out));
+  s._st.forEach(o=>o.list.forEach(([k])=>m=Math.max(m,k)));
+  s._pos.forEach(o=>o.list.forEach(([k])=>m=Math.max(m,k)));
+  s._max=m;
+  const n=s.querySelector('.notes');s._notes=n?n.textContent.trim():'';
+});
+
+function pick(list,step){let v=null;for(const[k,val]of list){if(k<=step)v=val}return v}
+function apply(s,step,instant){
+  if(instant)s.classList.add('instant');
+  s.dataset.step=step;
+  s._ats.forEach(e=>{const on=step>=+e.dataset.at;const was=e.classList.contains('in');e.classList.toggle('in',on);
+    if(on&&!was&&!instant&&e.dataset.scramble)scramble(e)});
+  s._outs.forEach(e=>e.classList.toggle('gone',step>=+e.dataset.out));
+  s._pos.forEach(({el,list})=>{const v=pick(list,step)||list[0][1];el.style.transform=`translate(${v[0]}px,${v[1]}px)`+(v[2]?` scale(${v[2]})`:'')});
+  s._st.forEach(({el,list})=>{const v=pick(list,step);if(v)el.dataset.s=v;else delete el.dataset.s});
+  if(instant){void s.offsetWidth;requestAnimationFrame(()=>requestAnimationFrame(()=>s.classList.remove('instant')))}
+}
+function scramble(el){
+  const final=el.dataset.scramble;const chars='ABCDEFGHJKLMNPQRSTUVWXYZ0123456789#%&*@!?';let n=0;
+  const tick=()=>{n++;el.textContent=[...final].map((c,i)=>i<n/2?c:chars[Math.random()*chars.length|0]).join('');if(n<final.length*2)setTimeout(tick,45)};tick();
+}
+
+/* ---------------- navigation ---------------- */
+let cur=-1,step=0;
+const hudCount=document.getElementById('hud-count'),hudDots=document.getElementById('hud-dots'),bar=document.getElementById('bar');
+const notesBox=document.getElementById('notes'),notesText=document.getElementById('notes-text');
+function go(i,st,dir){
+  i=Math.max(0,Math.min(slides.length-1,i));
+  const s=slides[i];st=Math.max(0,Math.min(s._max,st));
+  const entering=i!==cur;
+  if(entering&&cur>=0){const p=slides[cur];p.classList.remove('active');clearTimers(p.id);hooks[p.id]&&hooks[p.id].leave&&hooks[p.id].leave(p)}
+  const prevStep=entering?-1:step;
+  cur=i;step=st;
+  s.classList.add('active');
+  apply(s,st,entering);
+  if(hooks[s.id]&&hooks[s.id].step)hooks[s.id].step(s,st,{enter:entering,dir,prevStep});
+  hudCount.textContent=(i+1)+' / '+slides.length;
+  hudDots.innerHTML='';if(s._max>0&&s._max<=14){for(let k=1;k<=s._max;k++){const d=document.createElement('i');if(k<=st)d.className='on';hudDots.appendChild(d)}}
+  bar.style.width=((i+(s._max?st/(s._max+1):0))/(slides.length-1)*100)+'%';
+  notesText.textContent=s._notes||'(no notes for this slide)';
+  try{history.replaceState(null,'','#'+(i+1))}catch(e){}
+}
+function next(){const s=slides[cur];if(step<s._max)go(cur,step+1,1);else if(cur<slides.length-1)go(cur+1,0,1)}
+function prev(){if(step>0)go(cur,step-1,-1);else if(cur>0)go(cur-1,slides[cur-1]._max,-1)}
+
+function fit(){const w=viewport.clientWidth,h=viewport.clientHeight;const k=Math.min(w/1600,h/900);stage.style.transform=`translate(-50%,-50%) scale(${k})`}
+window.addEventListener('resize',fit);fit();
+
+const help=document.getElementById('help');
+function toggleFS(){try{if(!document.fullscreenElement){const r=document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen();if(r&&r.catch)r.catch(()=>{})}else{const r=document.exitFullscreen();if(r&&r.catch)r.catch(()=>{})}}catch(e){}}
+document.addEventListener('keydown',e=>{
+  if(e.metaKey||e.ctrlKey||e.altKey)return;
+  const k=e.key;
+  if(!help.hidden&&(k==='Escape'||k==='?'||k==='h')){help.hidden=true;e.preventDefault();return}
+  if(k==='ArrowRight'||k===' '||k==='PageDown'||k==='Enter'){e.preventDefault();next()}
+  else if(k==='ArrowLeft'||k==='PageUp'||k==='Backspace'){e.preventDefault();prev()}
+  else if(k==='ArrowDown'){e.preventDefault();if(cur<slides.length-1)go(cur+1,0,1)}
+  else if(k==='ArrowUp'){e.preventDefault();if(cur>0)go(cur-1,0,-1)}
+  else if(k==='Home'){e.preventDefault();go(0,0,-1)}
+  else if(k==='End'){e.preventDefault();go(slides.length-1,0,1)}
+  else if(k==='f'||k==='F'){toggleFS()}
+  else if(k==='n'||k==='N'){notesBox.hidden=!notesBox.hidden}
+  else if(k==='?'||k==='h'){help.hidden=false}
+  else if(k==='Escape'){notesBox.hidden=true}
+});
+viewport.addEventListener('click',e=>{
+  if(e.target.closest('a,button'))return;
+  const r=viewport.getBoundingClientRect();if(e.clientX-r.left<r.width*0.28)prev();else next();
+});
+let tx=null,ty=null;
+viewport.addEventListener('touchstart',e=>{const t=e.touches[0];tx=t.clientX;ty=t.clientY},{passive:true});
+viewport.addEventListener('touchend',e=>{if(tx===null)return;const t=e.changedTouches[0];const dx=t.clientX-tx,dy=t.clientY-ty;
+  if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){e.preventDefault();dx<0?next():prev()}tx=null},{passive:false});
+document.getElementById('btn-prev').addEventListener('click',prev);
+document.getElementById('btn-next').addEventListener('click',next);
+help.addEventListener('click',()=>help.hidden=true);
+
+/* ---------------- slide hooks ---------------- */
+// Title: 116 digits collapse into 4
+hooks['s-title']={step(s,st,o){
+  if(!o.enter)return;
+  const box=document.getElementById('title-digits'),big=document.getElementById('title-big4'),lab=document.getElementById('title-state');
+  box.innerHTML='';big.classList.remove('show');lab.textContent='expected: 116 random digits';
+  [...LONGKEY].forEach(c=>{const sp=document.createElement('span');sp.textContent=c;box.appendChild(sp)});
+  later('s-title',()=>{[...box.children].forEach(sp=>{sp.style.transitionDelay=(Math.random()*.7).toFixed(2)+'s';sp.classList.add('fall')})},1800);
+  later('s-title',()=>{big.classList.add('show');lab.textContent='eMudhra, 2025'},2700);
+}};
+// Hook slide: dim the long key when 4 appears
+hooks['s-hook']={step(s,st){document.getElementById('hook-long').classList.toggle('shrink',st>=2)}};
+
+// Toy ring jumps
+const RSEQ=[3,9,27,19,26,16,17];
+function ringDraw(n,animate){
+  const g=document.getElementById('ring-jumps');if(!g)return;g.innerHTML='';
+  for(let v=1;v<=30;v++){document.getElementById('rd'+v).setAttribute('class','rdot');document.getElementById('rl'+v).setAttribute('class','rlbl')}
+  const kEl=document.getElementById('ring-k');
+  if(n>=1){document.getElementById('rd3').setAttribute('class','rdot g')}
+  kEl.textContent=n>=1?1:0;
+  if(n<2)return;
+  const drawUpTo=i=>{
+    const a=ringPos(RSEQ[i-1]),b=ringPos(RSEQ[i]);
+    const mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;const cx=mx+(300-mx)*.45,cy=my+(300-my)*.45;
+    const p=svgEl('path',{d:`M${a[0]} ${a[1]} Q${cx} ${cy} ${b[0]} ${b[1]}`,class:'jump',pathLength:1});
+    if(animate){p.style.strokeDasharray=1;p.style.strokeDashoffset=1;p.style.transition='stroke-dashoffset .45s ease';requestAnimationFrame(()=>requestAnimationFrame(()=>p.style.strokeDashoffset=0))}
+    g.appendChild(p);
+    const t=svgEl('text',{x:b[0]+(b[0]>300?22:-22),y:b[1]+(b[1]>300?22:-14),class:'jn'});t.textContent=(i+1);g.appendChild(t);
+    kEl.textContent=i+1;
+    if(i===6){document.getElementById('rd17').setAttribute('class','rdot hit');document.getElementById('rl17').setAttribute('class','rlbl hit')}
+  };
+  if(animate){for(let i=1;i<7;i++)later('s-ring',()=>drawUpTo(i),i*520)}
+  else for(let i=1;i<7;i++)drawUpTo(i);
+}
+hooks['s-ring']={step(s,st,o){clearTimers('s-ring');const anim=!o.enter&&o.dir>0&&st===2;ringDraw(st>=2?7:(st>=1?1:0),anim)}};
+
+// Bytes
+hooks['s-bytes']={step(s,st,o){
+  clearTimers('s-bytes');
+  const cells=[...document.getElementById('bytes-grid').children];const lbl=document.getElementById('bytes-lbl');
+  const good=()=>{cells.forEach((c,i)=>{c.className='';c.textContent=GOODHEX.substr(i*2,2)});lbl.textContent='A good P-384 private key: 48 random bytes'};
+  const bad=i=>{const c=cells[i];if(i===47){c.className='last';c.textContent='04'}else{c.className='z';c.textContent='00'}};
+  if(st<1){good();return}
+  lbl.textContent="eMudhra's weak key: 47 zero bytes + one byte";
+  if(!o.enter&&o.dir>0&&st===1){good();cells.forEach((c,i)=>later('s-bytes',()=>bad(i),200+i*32))}
+  else cells.forEach((c,i)=>bad(i));
+}};
+
+// Live P-384 brute force
+const P384={p:(1n<<384n)-(1n<<128n)-(1n<<96n)+(1n<<32n)-1n,
+  G:[0xaa87ca22be8b05378eb1c71ef320ad746e1d3b628ba79b9859f741e082542a385502f25dbf55296c3a545e3872760ab7n,
+     0x3617de4a96262c6f5d9e98bf9292dc29f8f41dbd289a147ce9da3113b5f0b8c00a60b1ce1d7e819d7a431d7c90ea0e5fn]};
+function md(a){const p=P384.p;a%=p;return a<0n?a+p:a}
+function inv(a){let t=0n,nt=1n,r=P384.p,nr=md(a);while(nr){const q=r/nr;[t,nt]=[nt,t-q*nt];[r,nr]=[nr,r-q*nr]}return md(t)}
+function padd(A,B){if(!A)return B;if(!B)return A;const[x1,y1]=A,[x2,y2]=B;let l;
+  if(x1===x2){if(md(y1+y2)===0n)return null;l=md((3n*x1*x1-3n)*inv(2n*y1))}else l=md((y2-y1)*inv(x2-x1));
+  const x3=md(l*l-x1-x2);return[x3,md(l*(x1-x3)-y1)]}
+const hex96=x=>x.toString(16).padStart(96,'0');
+const TARGET='138251cd52ac9298c1c8aad977321deb97e709bd0b4ca0aca55dc8ad51dcfc9d1589a1597e3a5120e1efd631c63e1835';
+let bruteCache=null;
+function bruteAll(){if(bruteCache)return bruteCache;const t0=performance.now();let Q=null;const xs=[];let found=0;
+  for(let k=1;k<=255;k++){Q=padd(Q,P384.G);const h=hex96(Q[0]);xs.push(h);if(h===TARGET&&!found)found=k}
+  bruteCache={ms:performance.now()-t0,xs,found};return bruteCache}
+hooks['s-brute']={step(s,st,o){
+  clearTimers('s-brute');
+  const kEl=document.getElementById('brute-k'),cand=document.getElementById('brute-cand'),stat=document.getElementById('brute-status'),run=document.getElementById('brute-run');
+  const reset=()=>{run.classList.remove('hit');kEl.textContent='–';cand.textContent='waiting…';stat.textContent='';stat.style.color=''};
+  const show=(k,xs)=>{kEl.textContent=k;cand.textContent='k × G → x = '+xs[k-1];const hit=xs[k-1]===TARGET;run.classList.toggle('hit',hit);
+    stat.innerHTML=hit?'<span class="c-ok">✓ Match. The private key is '+k+'.</span>':'<span class="c-bad">✗ no match</span>'};
+  if(st<2){reset();return}
+  const r=bruteAll();
+  if(st===2){
+    if(!o.enter&&o.dir>0){reset();for(let k=1;k<=r.found;k++)later('s-brute',()=>show(k,r.xs),300+(k-1)*900)}
+    else show(r.found,r.xs);
+    return}
+  // st 3: sweep all 255
+  const final=ms=>{kEl.textContent='1–255';cand.textContent='All 255 candidates computed and compared.';run.classList.add('hit');
+    stat.innerHTML='<span class="c-ok">Done in '+ms.toFixed(1)+' ms of real computation on this device.</span>'};
+  if(!o.enter&&o.dir>0){bruteCache=null;const rr=bruteAll();run.classList.remove('hit');stat.textContent='';
+    const start=performance.now(),dur=1600;
+    const anim=()=>{if(slides[cur].id!=='s-brute'||step!==3)return;const f=Math.min(1,(performance.now()-start)/dur);const k=Math.max(1,Math.round(f*255));
+      kEl.textContent=k;cand.textContent='k × G → x = '+rr.xs[k-1];if(f<1)requestAnimationFrame(anim);else final(rr.ms)};
+    requestAnimationFrame(anim)}
+  else final(r.ms);
+}};
+
+// Terminal typing
+const TERM=[
+  {at:1,t:'$ ',c:'pr'},{at:1,t:'curl https://dv-g3b-emudhra.we-have-a-problem.com\n',type:true},
+  {at:2,t:'curl: (60) SSL certificate problem: unable to get local issuer certificate\n'},
+  {at:2,t:'# example output. Error = good: this client rejects the broken chain\n\n',c:'c-ok'},
+  {at:3,t:'$ ',c:'pr'},{at:3,t:'/usr/bin/curl https://dv-g3b-emudhra.we-have-a-problem.com\n',type:true},
+  {at:3,t:'<!doctype html> … the page loads\n'},
+  {at:3,t:'# example output. Page loads = bad: this client still trusts the broken keys\n',c:'c-bad'}];
+hooks['s-test']={step(s,st,o){
+  clearTimers('s-test');const pre=document.getElementById('term-pre');pre.innerHTML='';
+  const animate=!o.enter&&o.dir>0;let delay=0;
+  const add=(seg,instant)=>{const sp=document.createElement('span');if(seg.c)sp.className=seg.c;pre.appendChild(sp);
+    if(seg.type&&!instant){[...seg.t].forEach((ch,i)=>later('s-test',()=>{sp.textContent+=ch},delay+i*28));delay+=seg.t.length*28+250}
+    else if(!instant){later('s-test',()=>{sp.textContent=seg.t},delay);delay+=350}
+    else sp.textContent=seg.t};
+  TERM.forEach(seg=>{if(seg.at<=st)add(seg,!(animate&&seg.at===st))});
+  const caret=document.createElement('span');caret.className='caret';later('s-test',()=>pre.appendChild(caret),delay);
+}};
+
+/* ---------------- start ---------------- */
+const m=/^#(\d+)$/.exec(location.hash||'');
+go(m?(+m[1]-1):0,0,1);
+const toast=document.getElementById('toast');setTimeout(()=>toast.classList.add('hide'),5000);
+})();
+</script>
+</body>
+</html>
